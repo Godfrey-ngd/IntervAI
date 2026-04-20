@@ -358,17 +358,21 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
   };
 
   return (
-    <div className="max-w-7xl mx-auto pt-8 pb-10 px-4">
+    <div className="mx-auto max-w-7xl space-y-6 pb-4">
       {/* 头部 */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="surface-card flex items-center justify-between gap-4 px-6 py-6 md:px-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">问答助手</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">选择知识库，向 AI 提问</p>
+          <div className="section-kicker mb-3">
+            <MessageSquare className="h-3.5 w-3.5" />
+            知识问答
+          </div>
+          <h1 className="section-title mb-1 flex items-center gap-3">问答助手</h1>
+          <p className="section-subtitle">选择知识库，向 AI 提问</p>
         </div>
         <div className="flex gap-3">
           <motion.button
             onClick={onUpload}
-            className="px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
+            className="nav-pill"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -376,7 +380,7 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
           </motion.button>
           <motion.button
             onClick={onBack}
-            className="px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
+            className="nav-pill"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -389,13 +393,13 @@ export default function KnowledgeBaseQueryPage({ onBack, onUpload }: KnowledgeBa
         {/* 左侧：对话历史 */}
         <div className="w-64 flex-shrink-0">
           <div
-              className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm h-full flex flex-col border border-slate-100 dark:border-slate-700">
+              className="surface-card flex h-full flex-col p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-slate-800 dark:text-white">对话历史</h2>
               <motion.button
                 onClick={handleNewSession}
                 disabled={selectedKbIds.size === 0}
-                className="p-1.5 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-xl p-1.5 text-primary-500 transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/30 disabled:cursor-not-allowed disabled:opacity-50"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 title="新建对话"

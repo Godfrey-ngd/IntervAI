@@ -131,18 +131,22 @@ export default function InterviewHubPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="mx-auto max-w-6xl space-y-6 pb-2">
       {/* 页面标题 */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
-          <Sparkles className="w-7 h-7 text-primary-500" />
+      <div className="surface-card px-6 py-6 md:px-8">
+        <div className="section-kicker mb-3">
+          <Sparkles className="h-3.5 w-3.5" />
+          面试中心
+        </div>
+        <h1 className="section-title flex items-center gap-3">
+          <Sparkles className="h-7 w-7 text-primary-500" />
           模拟面试
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">选择面试模式和方向，快速开始练习</p>
+        <p className="section-subtitle mt-2">选择面试模式和方向，快速开始练习</p>
       </div>
 
       {/* 配置区域 */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6 mb-8">
+      <div className="surface-card p-6 md:p-8">
         <div className="space-y-6">
           {/* 面试模式 */}
           <div>

@@ -229,24 +229,27 @@ export default function ResumeDetailPage({ resumeId, onBack, onStartInterview }:
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="w-full"
+      className="mx-auto w-full max-w-7xl space-y-6 pb-2"
     >
       {/* 顶部导航栏 */}
-      <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+      <div className="surface-card flex flex-wrap items-center justify-between gap-4 px-6 py-6 md:px-8">
         <div className="flex items-center gap-4">
             <motion.button
             onClick={detailView === 'interviewDetail' ? handleBackToInterviewList : onBack}
-            className="w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-300 transition-all shadow-sm"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <ChevronLeft className="w-5 h-5" />
           </motion.button>
           <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+            <div className="section-kicker mb-2">
+              {detailView === 'interviewDetail' ? '面试详情' : '简历详情'}
+            </div>
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
               {detailView === 'interviewDetail' ? `面试详情 #${selectedInterview?.sessionId?.slice(-6) || ''}` : resume.filename}
             </h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
               <Clock className="w-4 h-4" />
                   {detailView === 'interviewDetail'
                 ? `完成于 ${formatDateOnly(selectedInterview?.completedAt || selectedInterview?.createdAt || '')}`
@@ -261,7 +264,7 @@ export default function ResumeDetailPage({ resumeId, onBack, onStartInterview }:
             <motion.button
               onClick={() => handleExportInterviewPdf(selectedInterview.sessionId)}
               disabled={exporting === selectedInterview.sessionId}
-              className="px-5 py-2.5 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 transition-all disabled:opacity-50 flex items-center gap-2"
+              className="nav-pill disabled:opacity-50"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -272,7 +275,7 @@ export default function ResumeDetailPage({ resumeId, onBack, onStartInterview }:
           {detailView !== 'interviewDetail' && (
             <motion.button
               onClick={() => onStartInterview(resumeId)}
-              className="px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-medium shadow-lg shadow-primary-500/30 hover:shadow-xl transition-all flex items-center gap-2"
+              className="gradient-button"
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -285,7 +288,7 @@ export default function ResumeDetailPage({ resumeId, onBack, onStartInterview }:
 
       {/* 标签页切换 - 仅在非面试详情时显示 */}
       {detailView !== 'interviewDetail' && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-2 mb-6 inline-flex gap-1">
+          <div className="surface-card inline-flex gap-1 p-2">
           {tabs.map((tab) => (
             <motion.button
               key={tab.id}

@@ -104,30 +104,34 @@ export default function HistoryList({onSelectResume}: HistoryListProps) {
 
   return (
     <motion.div
-      className="w-full"
+      className="mx-auto w-full max-w-6xl space-y-6 pb-2"
       initial={{opacity: 0}}
       animate={{opacity: 1}}
     >
       {/* 头部 */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="surface-card flex items-center justify-between gap-4 px-6 py-6 md:px-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+          <div className="section-kicker mb-3">
+            <FileStack className="h-3.5 w-3.5" />
+            简历中心
+          </div>
+          <h1 className="section-title flex items-center gap-3">
             <FileStack className="w-7 h-7 text-primary-500" />
             简历管理
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">管理您的简历，AI 智能分析与评分</p>
+          <p className="section-subtitle mt-2">管理您的简历，AI 智能分析与评分</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => navigate(ROUTES.resumeUpload)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            className="gradient-button"
           >
             <Upload className="w-4 h-4" />
             上传简历
           </button>
           <button
             onClick={() => navigate('/interview-hub')}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+            className="nav-pill"
           >
             <Sparkles className="w-4 h-4" />
             模拟面试
@@ -136,8 +140,8 @@ export default function HistoryList({onSelectResume}: HistoryListProps) {
       </div>
 
       {/* 搜索栏 */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 max-w-md focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 transition-all">
+      <div className="surface-card p-4">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition-all focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 dark:border-slate-700 dark:bg-slate-950/40 max-w-md">
           <svg className="w-5 h-5 text-slate-400" viewBox="0 0 24 24" fill="none">
             <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
             <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -154,7 +158,7 @@ export default function HistoryList({onSelectResume}: HistoryListProps) {
 
       {/* 加载状态 */}
       {loading && (
-        <div className="text-center py-20">
+        <div className="surface-card py-20 text-center">
           <motion.div
             className="w-10 h-10 border-3 border-slate-200 dark:text-slate-200 border-t-primary-500 rounded-full mx-auto mb-4"
             animate={{rotate: 360}}
@@ -167,7 +171,7 @@ export default function HistoryList({onSelectResume}: HistoryListProps) {
       {/* 空状态 */}
       {!loading && filteredResumes.length === 0 && (
         <motion.div
-          className="text-center py-20 bg-white dark:bg-slate-800 rounded-2xl"
+          className="surface-card py-20 text-center"
           initial={{opacity: 0, scale: 0.95}}
           animate={{opacity: 1, scale: 1}}
         >
@@ -180,7 +184,7 @@ export default function HistoryList({onSelectResume}: HistoryListProps) {
       {/* 表格 */}
       {!loading && filteredResumes.length > 0 && (
         <motion.div
-          className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden"
+          className="surface-card overflow-hidden"
           initial={{opacity: 0, y: 20}}
           animate={{opacity: 1, y: 0}}
           transition={{delay: 0.2}}

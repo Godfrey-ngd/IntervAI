@@ -228,15 +228,14 @@ export default function HistoryList({ onSelectResume }: HistoryListProps) {
 
   return (
     <motion.div
-      className="w-full"
+      className="mx-auto w-full max-w-7xl space-y-6 pb-2"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      {/* 头部 */}
-      <div className="flex justify-between items-start mb-8 flex-wrap gap-6">
+      <div className="surface-card flex flex-wrap items-start justify-between gap-6 px-6 py-6 md:px-8">
         <div>
           <motion.h1
-            className="text-2xl font-bold text-slate-800 flex items-center gap-3"
+            className="section-title flex items-center gap-3"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
@@ -244,7 +243,7 @@ export default function HistoryList({ onSelectResume }: HistoryListProps) {
             简历库
           </motion.h1>
           <motion.p
-            className="text-slate-500 mt-1"
+            className="section-subtitle mt-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
@@ -254,7 +253,7 @@ export default function HistoryList({ onSelectResume }: HistoryListProps) {
         </div>
 
         <motion.div
-          className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-2.5 min-w-[280px] focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 transition-all"
+          className="flex min-w-[280px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 transition-all focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 dark:border-slate-700 dark:bg-slate-950/40"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
         >
@@ -264,14 +263,14 @@ export default function HistoryList({ onSelectResume }: HistoryListProps) {
             placeholder="搜索简历..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 outline-none text-slate-700 placeholder:text-slate-400"
+            className="flex-1 bg-transparent outline-none text-slate-700 placeholder:text-slate-400 dark:text-slate-200"
           />
         </motion.div>
       </div>
 
       {/* 统计卡片 */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <StatCard
             icon={FileStack}
             label="简历总数"
@@ -303,7 +302,7 @@ export default function HistoryList({ onSelectResume }: HistoryListProps) {
       {/* 空状态 */}
       {!loading && filteredResumes.length === 0 && (
         <motion.div
-          className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-100"
+          className="surface-card py-20 text-center"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
@@ -316,13 +315,13 @@ export default function HistoryList({ onSelectResume }: HistoryListProps) {
       {/* 表格 */}
       {!loading && filteredResumes.length > 0 && (
         <motion.div
-          className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
+          className="surface-card overflow-hidden"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
           <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-100">
+            <thead className="bg-slate-50/90 border-b border-slate-100 dark:bg-slate-900/70 dark:border-slate-700">
               <tr>
                 <th className="text-left px-6 py-4 text-sm font-medium text-slate-600">名称</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-slate-600">大小</th>

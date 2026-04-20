@@ -241,7 +241,7 @@ export default function Interview({
   if (!session || !currentQuestion) return null;
 
   return (
-    <div className="pb-10">
+    <div className="mx-auto max-w-6xl space-y-6 pb-10">
       <InterviewPageHeader
         title="模拟面试"
         subtitle="认真回答每个问题，展示您的实力"

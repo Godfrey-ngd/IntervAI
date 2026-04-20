@@ -145,7 +145,7 @@ export default function AnalysisPanel({
   if (isProcessing) {
     const isExplicitProcessing = analyzeStatus === 'PROCESSING';
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center">
+        <div className="surface-card p-12 text-center">
           <div
               className="w-16 h-16 mx-auto mb-6 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
           {isExplicitProcessing ? (
@@ -170,7 +170,7 @@ export default function AnalysisPanel({
   // 处理分析失败状态
   if (analyzeStatus === 'FAILED' || !isAnalysisValid) {
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center">
+        <div className="surface-card p-12 text-center">
           <div
               className="w-16 h-16 mx-auto mb-6 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-red-500 dark:text-red-400"/>
@@ -187,7 +187,7 @@ export default function AnalysisPanel({
           <motion.button
             onClick={onReanalyze}
             disabled={reanalyzing}
-            className="px-6 py-2.5 bg-primary-500 text-white rounded-xl font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center gap-2 mx-auto"
+            className="gradient-button mx-auto disabled:opacity-50"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -211,7 +211,7 @@ export default function AnalysisPanel({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 核心评价 */}
         <motion.div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6"
+          className="surface-card p-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -234,18 +234,18 @@ export default function AnalysisPanel({
           </div>
 
           <div
-              className="bg-gradient-to-br from-emerald-50 dark:from-emerald-900/30 to-green-50 dark:to-slate-800 rounded-xl p-6">
+                className="rounded-3xl bg-gradient-to-br from-emerald-50 to-green-50 p-6 dark:from-emerald-950/35 dark:to-slate-950/45">
             <p className="text-lg text-slate-800 dark:text-white leading-relaxed mb-6">
               {analysis.summary || '候选人具备扎实的技术基础，有大型项目架构经验。'}
             </p>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-5">
+              <div className="surface-card p-5">
                 <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 block mb-2">总分</span>
                 <span className="text-4xl font-bold text-slate-900 dark:text-white">{analysis.overallScore || 0}</span>
                 <span className="text-sm text-slate-500 dark:text-slate-400">/ 100</span>
               </div>
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-5">
+              <div className="surface-card p-5">
                 <span
                     className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 block mb-2">分析时间</span>
                 <span className="text-sm text-slate-700 dark:text-slate-300">
@@ -256,7 +256,7 @@ export default function AnalysisPanel({
 
             {/* 优势标签 */}
             {analysis.strengths && analysis.strengths.length > 0 && (
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-4">
+                <div className="surface-card p-4">
                   <span
                       className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 block mb-3">优势亮点</span>
                 <div className="flex flex-wrap gap-2">
@@ -274,7 +274,7 @@ export default function AnalysisPanel({
 
         {/* 多维度评分雷达图 */}
         <motion.div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6"
+          className="surface-card p-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -329,8 +329,8 @@ export default function AnalysisPanel({
       </div>
 
       {/* 改进建议 - 按优先级分类 */}
-      <motion.div
-          className="bg-white dark:bg-slate-800 rounded-2xl p-6"
+        <motion.div
+          className="surface-card p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}

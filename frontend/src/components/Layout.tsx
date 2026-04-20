@@ -1,6 +1,16 @@
 import {Link, Outlet, useLocation, useNavigate} from 'react-router-dom';
 import {motion} from 'framer-motion';
-import {Calendar, ChevronRight, Database, FileStack, MessageSquare, Moon, Sparkles, Sun, Users,} from 'lucide-react';
+import {
+  Calendar,
+  Database,
+  FileStack,
+  History,
+  Moon,
+  Sparkles,
+  Sun,
+  Upload,
+  WandSparkles,
+} from 'lucide-react';
 import {useTheme} from '../hooks/useTheme';
 import {useState} from 'react';
 import UnifiedInterviewModal, {UnifiedInterviewConfig} from './UnifiedInterviewModal';
@@ -11,12 +21,6 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   description?: string;
-}
-
-interface NavGroup {
-  id: string;
-  title: string;
-  items: NavItem[];
 }
 
 export default function Layout() {
@@ -79,26 +83,12 @@ export default function Layout() {
     });
   };
 
-  // 按业务模块组织的导航项
-  const navGroups: NavGroup[] = [
-    {
-      id: 'interview',
-      title: '面试准备',
-      items: [
-        { id: 'resumes', path: '/history', label: '简历管理', icon: FileStack, description: '管理简历，AI 分析' },
-        { id: 'interview-hub', path: '/interview-hub', label: '模拟面试', icon: Sparkles, description: '文字/语音面试练习' },
-        { id: 'interviews', path: '/interviews', label: '面试记录', icon: Users, description: '查看面试历史' },
-        { id: 'interview-schedule', path: '/interview-schedule', label: '面试日程', icon: Calendar, description: '管理面试安排' },
-      ],
-    },
-    {
-      id: 'knowledge',
-      title: '知识库',
-      items: [
-        { id: 'kb-manage', path: '/knowledgebase', label: '知识库管理', icon: Database, description: '管理知识文档' },
-        { id: 'chat', path: '/knowledgebase/chat', label: '问答助手', icon: MessageSquare, description: '基于知识库问答' },
-      ],
-    },
+  const navItems: NavItem[] = [
+    { id: 'resumes', path: '/history', label: '简历管理', icon: FileStack, description: '管理简历' },
+    { id: 'interview-hub', path: '/interview-hub', label: '模拟面试', icon: WandSparkles, description: '文字/语音练习' },
+    { id: 'interviews', path: '/interviews', label: '面试记录', icon: History, description: '查看历史' },
+    { id: 'kb-manage', path: '/knowledgebase', label: '知识库', icon: Database, description: '管理文档' },
+    { id: 'interview-schedule', path: '/interview-schedule', label: '面试日程', icon: Calendar, description: '安排面试' },
   ];
 
   // 判断当前页面是否匹配导航项
@@ -123,115 +113,111 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800">
-      {/* 左侧边栏 */}
-      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-700 fixed h-screen left-0 top-0 z-50 flex flex-col">
-        {/* Logo */}
-        <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 text-slate-900 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:text-slate-50">
+      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/80 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/80">
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 lg:px-6">
           <Link to="/history" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary-500/30">
-              <Sparkles className="w-5 h-5" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-cyan-500 text-white shadow-lg shadow-primary-500/25">
+              <Sparkles className="h-6 w-6" />
             </div>
-            <div>
-              <span className="text-lg font-bold text-slate-800 dark:text-white tracking-tight block">AI Interview</span>
-              <span className="text-xs text-slate-400 dark:text-slate-500">智能面试助手</span>
+            <div className="hidden sm:block">
+              <p className="text-lg font-semibold tracking-tight">AI Interview</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">智能面试助手</p>
             </div>
           </Link>
-        </div>
 
-        {/* 主题切换按钮 */}
-        <div className="px-4 pb-2">
-          <button
-            onClick={toggleTheme}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-          >
-            {theme === 'dark' ? (
-              <>
-                <Sun className="w-4 h-4" />
-                <span className="text-sm font-medium">浅色模式</span>
-              </>
-            ) : (
-              <>
-                <Moon className="w-4 h-4" />
-                <span className="text-sm font-medium">深色模式</span>
-              </>
-            )}
-          </button>
-        </div>
+          <nav className="hidden flex-1 items-center justify-center gap-2 xl:flex">
+            {navItems.map((item) => {
+              const active = isActive(item.path);
+              const Icon = item.icon;
 
-        {/* 导航菜单 */}
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <div className="space-y-6">
-            {navGroups.map((group) => (
-              <div key={group.id}>
-                <div className="px-3 mb-2">
-                  <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                    {group.title}
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  {group.items.map((item) => {
-                    const active = isActive(item.path);
+              return (
+                <Link
+                  key={item.id}
+                  to={item.path}
+                  className={`group flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-all ${
+                    active
+                      ? 'border-primary-200 bg-primary-50 text-primary-700 shadow-sm dark:border-primary-800 dark:bg-primary-950/50 dark:text-primary-300'
+                      : 'border-transparent text-slate-600 hover:border-slate-200 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
 
-                    return (
-                      <Link
-                        key={item.id}
-                        to={item.path}
-                        className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
-                          ${active
-                            ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                          }`}
-                      >
-                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors
-                          ${active
-                            ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 group-hover:text-slate-700 dark:group-hover:text-white'
-                          }`}
-                        >
-                          <item.icon className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <span className={`text-sm block ${active ? 'font-semibold' : 'font-medium'}`}>
-                            {item.label}
-                          </span>
-                          {item.description && (
-                            <span className="text-xs text-slate-400 dark:text-slate-500 truncate block">
-                              {item.description}
-                            </span>
-                          )}
-                        </div>
-                        {active && <ChevronRight className="w-4 h-4 text-primary-400" />}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </nav>
-
-        {/* 底部信息 */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-700">
-          <div className="px-3 py-2 bg-gradient-to-r from-primary-50 to-indigo-50 dark:from-primary-900/30 dark:to-slate-800 rounded-xl">
-            <p className="text-xs text-primary-600 dark:text-primary-400 font-medium">AI 面试助手 v1.0</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Powered by AI</p>
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={() => navigate('/upload')}
+              className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-primary-200 hover:text-primary-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-primary-800 dark:hover:text-primary-300 md:inline-flex"
+            >
+              <Upload className="h-4 w-4" />
+              上传简历
+            </button>
+            <button
+              onClick={() => {
+                setInterviewModalPreset({
+                  defaultMode: 'text',
+                  title: '开始模拟面试',
+                  subtitle: '选择面试模式和主题，快速开始',
+                  startButtonText: '开始面试',
+                });
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-primary-500/20 transition-transform hover:-translate-y-0.5"
+            >
+              <WandSparkles className="h-4 w-4" />
+              快速开始
+            </button>
+            <button
+              onClick={toggleTheme}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-white"
+              aria-label="切换主题"
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
           </div>
         </div>
-      </aside>
+      </header>
 
       {/* 主内容区 */}
-      <main className="flex-1 ml-64 p-10 min-h-screen overflow-y-auto">
+      <main className="mx-auto max-w-7xl px-4 pb-28 pt-6 lg:px-6">
         <motion.div
           key={currentPath}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
+          exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.3 }}
+          className="surface-frame"
         >
           <Outlet context={{ openInterviewModalWithResume }} />
         </motion.div>
       </main>
+
+      <nav className="fixed inset-x-0 bottom-4 z-50 px-4 xl:hidden">
+        <div className="mx-auto flex max-w-2xl items-stretch gap-2 rounded-[1.5rem] border border-white/70 bg-white/90 p-2 shadow-2xl shadow-slate-900/10 backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-950/90">
+          {navItems.map((item) => {
+            const active = isActive(item.path);
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.id}
+                to={item.path}
+                className={`flex flex-1 flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-medium transition-colors ${
+                  active
+                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/60 dark:text-primary-300'
+                    : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="truncate">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
 
       {/* 统一面试弹窗 */}
       <UnifiedInterviewModal

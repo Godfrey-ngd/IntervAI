@@ -152,10 +152,10 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           type="button"
-          className="p-4 rounded-xl border-2 border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-left transition-all"
+          className="surface-card border-2 border-primary-500 bg-primary-50 text-left transition-all dark:bg-primary-950/30"
         >
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-primary-500 flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-500">
               <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -172,10 +172,10 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => setStep('form')}
-          className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary-300 dark:hover:border-primary-600 text-left transition-all"
+          className="surface-card border-2 border-slate-200 bg-white text-left transition-all hover:border-primary-300 dark:border-slate-700 dark:bg-slate-950/40 dark:hover:border-primary-600"
         >
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900">
               <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
@@ -205,7 +205,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           value={rawText}
           onChange={(e) => setRawText(e.target.value)}
           placeholder="支持飞书、腾讯会议、Zoom 等格式，或点击右上角“使用示例”快速体验解析。"
-          className="w-full h-48 px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 resize-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all"
+          className="w-full h-48 resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100 dark:placeholder-slate-500"
         />
       </div>
 
@@ -215,7 +215,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           whileTap={{ scale: 0.98 }}
           type="button"
           onClick={onClose}
-          className="px-5 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all"
+          className="nav-pill"
         >
           取消
         </motion.button>
@@ -225,7 +225,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           type="button"
           onClick={handleParse}
           disabled={!rawText.trim() || parsing}
-          className="px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-500 dark:to-primary-400 text-white rounded-xl font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="gradient-button disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {parsing ? '解析中...' : '解析文本'}
         </motion.button>
@@ -237,7 +237,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
     <div className="space-y-6">
       {parseResult && (
         <>
-          <div className={`p-5 rounded-xl border ${
+          <div className={`surface-card p-5 border ${
             parseResult.success
               ? 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/50 dark:to-emerald-900/30 border-emerald-200 dark:border-emerald-700'
               : 'bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/50 dark:to-red-900/30 border-red-200 dark:border-red-700'
@@ -282,7 +282,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
             )}
           </div>
 
-          <details className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+          <details className="surface-card p-4">
             <summary className="cursor-pointer font-semibold text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
               详细日志
             </summary>
@@ -299,7 +299,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => setStep('text')}
-          className="px-5 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium flex items-center gap-2 transition-all"
+          className="nav-pill"
         >
           <ChevronLeft className="w-4 h-4" />
           重新输入
@@ -309,7 +309,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           whileTap={{ scale: 0.98 }}
           type="button"
           onClick={() => setStep('form')}
-          className="px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-500 dark:to-primary-400 text-white rounded-xl font-medium shadow-lg hover:shadow-xl flex items-center gap-2 transition-all"
+          className="gradient-button"
         >
           {parseResult?.success ? '确认并编辑' : '手动输入'}
           <ChevronRight className="w-4 h-4" />
@@ -329,7 +329,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           value={formData.companyName}
           onChange={(e) => handleFormChange('companyName', e.target.value)}
           required
-          className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-all"
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100"
         />
       </div>
 
@@ -342,7 +342,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           value={formData.position}
           onChange={(e) => handleFormChange('position', e.target.value)}
           required
-          className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-all"
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100"
         />
       </div>
 
@@ -355,7 +355,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           value={formData.interviewTime ? dayjs(formData.interviewTime).format('YYYY-MM-DDTHH:mm') : ''}
           onChange={(e) => handleFormChange('interviewTime', e.target.value)}
           required
-          className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-all"
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100"
         />
       </div>
 
@@ -364,7 +364,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
         <select
           value={formData.interviewType}
           onChange={(e) => handleFormChange('interviewType', e.target.value)}
-          className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-all"
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100"
         >
           <option value="VIDEO">视频面试</option>
           <option value="ONSITE">现场面试</option>
@@ -378,7 +378,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           type="url"
           value={formData.meetingLink}
           onChange={(e) => handleFormChange('meetingLink', e.target.value)}
-          className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-all"
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100"
         />
       </div>
 
@@ -411,12 +411,12 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
           value={formData.notes}
           onChange={(e) => handleFormChange('notes', e.target.value)}
           rows={3}
-          className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 resize-none transition-all"
+          className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100"
         />
       </div>
 
       {submitError && (
-        <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 flex items-start gap-3 text-red-600 dark:text-red-400">
+          <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-600 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <div className="text-sm font-medium">{submitError}</div>
         </div>
@@ -429,7 +429,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
             whileTap={{ scale: 0.98 }}
             type="button"
             onClick={handleReset}
-            className="px-5 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all"
+            className="nav-pill"
           >
             重置
           </motion.button>
@@ -440,7 +440,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
             whileTap={{ scale: 0.98 }}
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all"
+            className="nav-pill"
           >
             取消
           </motion.button>
@@ -449,7 +449,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={submitting}
-            className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-500 dark:to-primary-400 text-white rounded-xl font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="gradient-button disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? '保存中...' : '保存'}
           </motion.button>
@@ -470,9 +470,9 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.2 }}
-        className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-200/50 dark:border-slate-700/50"
+        className="surface-card w-full max-w-2xl max-h-[90vh] overflow-y-auto"
       >
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5 dark:border-slate-700">
           <h2 className="text-2xl font-display font-bold text-slate-900 dark:text-white">
             {mode === 'edit' ? '编辑面试' : '添加面试'}
           </h2>
@@ -480,7 +480,7 @@ export const InterviewFormModal: React.FC<InterviewFormModalProps> = ({
             whileHover={{ scale: 1.1, rotate: 90 }}
             whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
+            className="rounded-xl p-2 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
           >
             <X className="w-5 h-5" />
           </motion.button>

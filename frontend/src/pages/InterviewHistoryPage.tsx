@@ -115,7 +115,7 @@ function StatCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700"
+      className="surface-card p-6"
     >
       <div className="flex items-center gap-4">
         <div className={`p-3 rounded-lg ${color}`}>
@@ -358,12 +358,16 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
   });
 
   return (
-    <motion.div className="w-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <motion.div className="mx-auto w-full max-w-7xl space-y-6 pb-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Header */}
-      <div className="flex justify-between items-start mb-8 flex-wrap gap-6">
+      <div className="surface-card flex flex-wrap items-start justify-between gap-6 px-6 py-6 md:px-8">
         <div>
+          <div className="section-kicker mb-3">
+            <Users className="h-3.5 w-3.5" />
+            面试归档
+          </div>
           <motion.h1
-            className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3"
+            className="section-title flex items-center gap-3"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
@@ -371,7 +375,7 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
             面试记录
           </motion.h1>
           <motion.p
-            className="text-slate-500 dark:text-slate-400 mt-1"
+            className="section-subtitle mt-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
@@ -381,7 +385,7 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
         </div>
 
         <motion.div
-          className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 min-w-[280px] focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 dark:focus-within:ring-primary-900/30 transition-all"
+          className="flex min-w-[280px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 transition-all focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 dark:border-slate-700 dark:bg-slate-950/40 dark:focus-within:ring-primary-900/30"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
         >
@@ -398,7 +402,7 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
 
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <StatCard icon={Users} label="面试总数" value={stats.totalCount} color="bg-primary-500" />
           <StatCard icon={CheckCircle} label="已完成" value={stats.completedCount} color="bg-emerald-500" />
           <StatCard icon={TrendingUp} label="平均分数" value={stats.averageScore} suffix="分" color="bg-indigo-500" />
@@ -406,7 +410,7 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
       )}
 
       {/* Type filter tabs */}
-      <div className="flex items-center gap-2 mb-6">
+      <div className="surface-card flex items-center gap-2 p-3">
         {([
           { key: 'all', label: '全部' },
           { key: 'text', label: '文字面试' },
@@ -415,10 +419,10 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
           <button
             key={tab.key}
             onClick={() => setTypeFilter(tab.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               typeFilter === tab.key
                 ? 'bg-primary-500 text-white'
-                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600'
+                : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900'
             }`}
           >
             {tab.label}
@@ -436,7 +440,7 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
       {/* Empty */}
       {!loading && filtered.length === 0 && (
         <motion.div
-          className="text-center py-20 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700"
+          className="surface-card py-20 text-center"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
@@ -449,7 +453,7 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
       {/* Table */}
       {!loading && filtered.length > 0 && (
         <motion.div
-          className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden"
+          className="surface-card overflow-hidden"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}

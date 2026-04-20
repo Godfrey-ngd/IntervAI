@@ -68,16 +68,16 @@ export default function InterviewPanel({
 
   if (interviews.length === 0) {
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center">
+        <div className="surface-card p-12 text-center">
           <div
-              className="w-16 h-16 mx-auto mb-6 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
+              className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-900">
           <Mic className="w-8 h-8 text-slate-400" />
         </div>
           <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">暂无面试记录</h3>
           <p className="text-slate-500 dark:text-slate-400 mb-6">开始模拟面试，获取专业评估</p>
         <motion.button
           onClick={onStartInterview}
-          className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-medium shadow-lg shadow-primary-500/30"
+          className="gradient-button"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
@@ -92,7 +92,7 @@ export default function InterviewPanel({
       {/* 面试表现趋势图 */}
       {chartData.length > 0 && (
           <motion.div
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6"
+              className="surface-card p-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -145,7 +145,7 @@ export default function InterviewPanel({
 
       {/* 历史面试场次 */}
       <motion.div
-          className="bg-white dark:bg-slate-800 rounded-2xl p-6"
+          className="surface-card p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -226,7 +226,7 @@ function InterviewItemCard({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.1 }}
       onClick={onView}
-      className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors group"
+      className="flex cursor-pointer items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950/40 dark:hover:bg-slate-900/70 group"
     >
       {/* 得分 */}
       <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg ${

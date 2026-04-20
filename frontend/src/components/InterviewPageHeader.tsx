@@ -14,17 +14,17 @@ export default function InterviewPageHeader({
 }: InterviewPageHeaderProps) {
   return (
     <motion.div
-      className="text-center mb-8"
+      className="surface-card mb-8 overflow-hidden text-center"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 flex items-center justify-center gap-3">
-        <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4 px-6 py-8">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-cyan-500 text-white shadow-lg shadow-primary-500/25">
           {icon}
         </div>
-        {title}
-      </h1>
-      <p className="text-slate-500 dark:text-slate-400">{subtitle}</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">{title}</h1>
+        <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>
+      </div>
     </motion.div>
   );
 }

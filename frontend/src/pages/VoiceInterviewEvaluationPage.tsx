@@ -179,16 +179,17 @@ export default function VoiceInterviewEvaluationPage() {
 
   return (
     <div className="pb-10">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="surface-card flex items-center gap-3 px-6 py-5">
           <button
             onClick={() => navigate('/interviews')}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            className="rounded-lg border border-slate-200 bg-white p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white">面试评估报告</h1>
+            <div className="section-kicker mb-2">语音评估</div>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">面试评估报告</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">语音会话 ID: {sessionId}</p>
           </div>
         </div>

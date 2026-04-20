@@ -549,7 +549,7 @@ export default function VoiceInterviewPage() {
 
   return (
     <div className="pb-10">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl space-y-6">
         <InterviewPageHeader
           title="语音模拟面试"
           subtitle="实时语音对话，面试官会根据你的回答持续追问"
@@ -565,12 +565,12 @@ export default function VoiceInterviewPage() {
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2 space-y-6">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+            <div className="surface-card p-6">
               <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => navigate('/interviews')}
-                    className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center justify-center"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                     title="返回面试记录"
                   >
                     <ArrowLeft className="w-4 h-4" />
@@ -588,7 +588,7 @@ export default function VoiceInterviewPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-700 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
                   <Clock className="w-4 h-4" />
                   <span className="font-mono text-sm tabular-nums">{formatTime(currentTime)}</span>
                 </div>
@@ -644,7 +644,7 @@ export default function VoiceInterviewPage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
+            <div className="surface-card p-5">
               <div className="flex items-center justify-center gap-6">
                 <button
                   onClick={() => {
@@ -700,7 +700,7 @@ export default function VoiceInterviewPage() {
             </div>
           </div>
 
-          <div className="h-[520px] md:h-[560px] xl:h-[calc(100vh-240px)] xl:max-h-[760px] bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+          <div className="surface-card h-[520px] overflow-hidden md:h-[560px] xl:h-[calc(100vh-240px)] xl:max-h-[760px]">
             <RealtimeSubtitle
               messages={messages}
               userText={userText}

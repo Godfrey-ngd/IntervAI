@@ -28,7 +28,7 @@ export class CalendarErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="bg-white dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-6 shadow-xl">
+        <div className="surface-card p-6">
           <div className="text-center py-12">
             <div className="text-red-500 text-6xl mb-4">📅</div>
             <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
@@ -42,7 +42,7 @@ export class CalendarErrorBoundary extends Component<Props, State> {
                 this.setState({ hasError: false, error: null });
                 window.location.reload();
               }}
-              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+              className="gradient-button"
             >
               刷新页面
             </button>

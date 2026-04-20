@@ -32,17 +32,19 @@ export default function UploadPage({ onUploadComplete }: UploadPageProps) {
   };
 
   return (
-    <FileUploadCard
-      title="开始您的 AI 模拟面试"
-      subtitle="上传 PDF 或 Word 简历，AI 将为您定制专属面试方案"
-      accept=".pdf,.doc,.docx,.txt"
-      formatHint="支持 PDF, DOCX, TXT"
-      maxSizeHint="最大 10MB"
-      uploading={uploading}
-      uploadButtonText="开始上传"
-      selectButtonText="选择简历文件"
-      error={error}
-      onUpload={handleUpload}
-    />
+    <div className="mx-auto max-w-7xl pb-2">
+      <FileUploadCard
+        title="开始您的 AI 模拟面试"
+        subtitle="上传 PDF 或 Word 简历，AI 将为您定制专属面试方案"
+        accept=".pdf,.doc,.docx,.txt"
+        formatHint="支持 PDF, DOCX, TXT"
+        maxSizeHint="最大 10MB"
+        uploading={uploading}
+        uploadButtonText="开始上传"
+        selectButtonText="选择简历文件"
+        error={error}
+        onUpload={handleUpload}
+      />
+    </div>
   );
 }

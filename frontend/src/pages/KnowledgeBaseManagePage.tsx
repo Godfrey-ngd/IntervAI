@@ -97,7 +97,7 @@ function StatCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700"
+      className="surface-card p-6"
     >
       <div className="flex items-center gap-4">
         <div className={`p-3 rounded-lg ${color}`}>
@@ -287,27 +287,31 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="mx-auto max-w-7xl space-y-6 pb-2">
       {/* 页面标题 */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="surface-card flex items-center justify-between gap-4 px-6 py-6 md:px-8">
         <div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+          <div className="section-kicker mb-3">
+            <Database className="h-3.5 w-3.5" />
+            知识中心
+          </div>
+          <h1 className="section-title flex items-center gap-3">
             <Database className="w-7 h-7 text-primary-500" />
             知识库管理
           </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">管理您的知识库文件，查看使用统计</p>
+          <p className="section-subtitle mt-2">管理您的知识库文件，查看使用统计</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={onUpload}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            className="gradient-button"
           >
             <Upload className="w-4 h-4" />
             上传知识库
           </button>
           <button
             onClick={onChat}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+            className="nav-pill"
           >
             <MessageSquare className="w-4 h-4" />
             问答助手
@@ -316,7 +320,7 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
       </div>
       {/* 统计卡片 */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <StatCard
             icon={Database}
             label="知识库总数"
@@ -339,8 +343,7 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
       )}
 
       {/* 搜索和筛选栏 */}
-        <div
-            className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
+      <div className="surface-card p-4 md:p-5">
         <div className="flex flex-wrap items-center gap-4">
           {/* 搜索框 */}
           <form onSubmit={handleSearch} className="flex-1 min-w-[200px]">
@@ -351,7 +354,7 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 placeholder="搜索知识库名称..."
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                className="w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 py-2 text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-950/40 dark:text-white"
               />
             </div>
           </form>
@@ -365,7 +368,7 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
                 setSearchKeyword('');
                 setSelectedCategory(null);
               }}
-              className="appearance-none pl-4 pr-10 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white cursor-pointer"
+              className="appearance-none cursor-pointer rounded-2xl border border-slate-200 bg-white py-2 pl-4 pr-10 text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-950/40 dark:text-white"
             >
               <option value="time">按时间排序</option>
               <option value="size">按大小排序</option>
@@ -383,7 +386,7 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
                 setSelectedCategory(e.target.value || null);
                 setSearchKeyword('');
               }}
-              className="appearance-none pl-4 pr-10 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white cursor-pointer"
+              className="appearance-none cursor-pointer rounded-2xl border border-slate-200 bg-white py-2 pl-4 pr-10 text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-slate-700 dark:bg-slate-950/40 dark:text-white"
             >
               <option value="">全部分类</option>
               {categories.map((cat) => (
@@ -398,8 +401,7 @@ export default function KnowledgeBaseManagePage({ onUpload, onChat }: KnowledgeB
       </div>
 
       {/* 知识库列表 */}
-        <div
-            className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+      <div className="surface-card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
