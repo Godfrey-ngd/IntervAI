@@ -16,9 +16,12 @@ export interface InterviewQuestion {
   question: string;
   type: string;
   category: string;
+  topicSummary?: string | null;
   userAnswer: string | null;
   score: number | null;
   feedback: string | null;
+  isFollowUp?: boolean;
+  parentQuestionIndex?: number | null;
 }
 
 export interface CreateInterviewRequest {
@@ -29,6 +32,7 @@ export interface CreateInterviewRequest {
   llmProvider?: string;
   skillId: string;
   difficulty?: string;
+  personaType?: 'STRICT' | 'FRIENDLY';
   customCategories?: CategoryDTO[];
   jdText?: string;
 }

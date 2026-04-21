@@ -60,6 +60,7 @@ export default function Layout() {
           interviewConfig: {
             skillId: config.skillId,
             difficulty: config.difficulty,
+            personaType: config.personaType,
             questionCount: config.questionCount,
             llmProvider: config.llmProvider,
           },
@@ -77,6 +78,7 @@ export default function Layout() {
         voiceConfig: {
           skillId: config.skillId,
           difficulty: config.difficulty,
+          personaType: config.personaType,
           techEnabled: true,
           projectEnabled: true,
           hrEnabled: true,

@@ -6,6 +6,7 @@ export interface CreateSessionRequest {
   roleType?: string;
   skillId: string;
   difficulty?: string;
+  personaType?: 'STRICT' | 'FRIENDLY';
   customJdText?: string;
   resumeId?: number;
   introEnabled?: boolean;

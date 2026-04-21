@@ -10,6 +10,7 @@ interface Message {
   content: string;
   category?: string;
   questionIndex?: number;
+  isFollowUp?: boolean;
 }
 
 interface InterviewChatPanelProps {
@@ -17,6 +18,8 @@ interface InterviewChatPanelProps {
   currentQuestion: InterviewQuestion | null;
   messages: Message[];
   answer: string;
+  currentStageLabel?: string;
+  stageProgress?: number;
   onAnswerChange: (answer: string) => void;
   onSubmit: () => void;
   onCompleteEarly: () => void;
@@ -33,6 +36,8 @@ export default function InterviewChatPanel({
   currentQuestion,
   messages,
   answer,
+  currentStageLabel,
+  stageProgress = 0,
   onAnswerChange,
   onSubmit,
   // onCompleteEarly, // 暂时未使用
@@ -58,6 +63,22 @@ export default function InterviewChatPanel({
       {/* 进度条 */}
         <div
             className="bg-white dark:bg-slate-800 rounded-2xl p-6 mb-4 shadow-sm dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700">
+        {currentStageLabel && (
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">当前阶段</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 border border-primary-100 dark:border-primary-700">
+              {currentStageLabel}
+            </span>
+          </div>
+        )}
+        <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-4">
+          <motion.div
+            className="h-full bg-gradient-to-r from-emerald-500 to-primary-500 rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.max(0, Math.min(100, stageProgress))}%` }}
+            transition={{ duration: 0.25 }}
+          />
+        </div>
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             题目 {currentQuestion ? currentQuestion.questionIndex + 1 : 0} / {session.totalQuestions}
@@ -91,6 +112,7 @@ export default function InterviewChatPanel({
                 role={msg.type === 'interviewer' ? 'interviewer' : 'user'}
                 text={msg.content}
                 category={msg.category}
+                isFollowUp={msg.isFollowUp}
               />
             </div>
           )}
