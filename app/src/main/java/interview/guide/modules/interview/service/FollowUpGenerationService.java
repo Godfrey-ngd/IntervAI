@@ -44,22 +44,30 @@ public class FollowUpGenerationService {
         );
     }
 
+    /**
+     * @param rootMainQuestion 该话题对应的主问题（锚点）
+     * @param allQuestions     全量题单（含已答）
+     * @param answeredQuestionIndex 候选人刚答完的题在列表中的下标（主问题或任一追问）
+     */
     public String generateFollowUp(ChatClient chatClient,
                                    String skillId,
                                    String personaType,
-                                   InterviewQuestionDTO mainQuestion,
+                                   InterviewQuestionDTO rootMainQuestion,
                                    String userAnswer,
                                    List<InterviewQuestionDTO> allQuestions,
-                                   int currentIndex) {
+                                   int answeredQuestionIndex) {
         String basePersona = loadSkillPersona(skillId);
         String personaSection = interviewerPersonaService.buildPersonaSection(basePersona, personaType);
+        InterviewQuestionDTO answeredQ = allQuestions.get(answeredQuestionIndex);
         Map<String, Object> variables = new HashMap<>();
         variables.put("personaSection", personaSection);
-        variables.put("mainQuestion", mainQuestion.question());
-        variables.put("mainCategory", mainQuestion.category() != null ? mainQuestion.category() : mainQuestion.type());
+        variables.put("rootMainQuestion", rootMainQuestion.question());
+        variables.put("lastInterviewerQuestion", answeredQ.question());
+        variables.put("mainCategory", rootMainQuestion.category() != null
+            ? rootMainQuestion.category() : rootMainQuestion.type());
         variables.put("userAnswer", userAnswer != null ? userAnswer : "");
         variables.put("usedTopicSummaries", buildUsedTopicSummaries(allQuestions));
-        variables.put("recentConversation", buildRecentConversation(allQuestions, currentIndex));
+        variables.put("recentConversation", buildRecentConversation(allQuestions, answeredQuestionIndex));
 
         Set<String> usedQuestions = allQuestions.stream()
             .map(InterviewQuestionDTO::question)
@@ -81,11 +89,11 @@ public class FollowUpGenerationService {
 
             String normalized = sanitizeGeneratedFollowUp(generated);
             if (normalized.isBlank() || usedQuestions.contains(normalizeForCompare(normalized))) {
-                return buildFallbackFollowUp(mainQuestion.question(), userAnswer);
+                return buildFallbackFollowUp(answeredQ.question(), userAnswer);
             }
             return normalized;
         } catch (Exception e) {
-            return buildFallbackFollowUp(mainQuestion.question(), userAnswer);
+            return buildFallbackFollowUp(answeredQ.question(), userAnswer);
         }
     }
 

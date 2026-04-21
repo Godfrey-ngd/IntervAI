@@ -1,10 +1,13 @@
 ## 面试官人格规则
 {personaSection}
 
-## 当前主问题
-{mainQuestion}
+## 话题锚点（最初的主问题，用于把握方向）
+{rootMainQuestion}
 
-## 当前主问题分类
+## 面试官上一轮提问（候选人刚回答的是这一问题）
+{lastInterviewerQuestion}
+
+## 该题分类
 {mainCategory}
 
 ## 候选人刚刚的回答

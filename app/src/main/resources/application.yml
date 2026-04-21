@@ -146,6 +146,12 @@ app:
         min-score-default: ${APP_AI_RAG_MIN_SCORE_DEFAULT:0.28}
   interview:
     follow-up-count: ${APP_INTERVIEW_FOLLOW_UP_COUNT:1}
+    # 主问题答完后是否进入追问的概率（0～1）
+    follow-up-probability: ${APP_INTERVIEW_FOLLOW_UP_PROBABILITY:0.72}
+    # 每条追问答完后是否继续下一条（含链式追加）的概率（0～1）
+    follow-up-chain-continue-probability: ${APP_INTERVIEW_FOLLOW_UP_CHAIN_CONTINUE_PROBABILITY:0.55}
+    # 同一主问题下最多追问条数（含初始生成与动态插入）
+    follow-up-max-depth-per-main: ${APP_INTERVIEW_FOLLOW_UP_MAX_DEPTH_PER_MAIN:4}
     evaluation:
       batch-size: ${APP_INTERVIEW_EVALUATION_BATCH_SIZE:8}
   resume:

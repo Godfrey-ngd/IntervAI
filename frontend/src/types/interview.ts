@@ -48,6 +48,8 @@ export interface SubmitAnswerResponse {
   nextQuestion: InterviewQuestion | null;
   currentIndex: number;
   totalQuestions: number;
+  /** 「反问」环节：面试官对用户问题的回答 */
+  interviewerReply?: string | null;
 }
 
 export interface CurrentQuestionResponse {

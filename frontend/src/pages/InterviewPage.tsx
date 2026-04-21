@@ -183,6 +183,13 @@ export default function Interview({
 
       setAnswer('');
 
+      if (response.interviewerReply?.trim()) {
+        setMessages(prev => [...prev, {
+          type: 'interviewer',
+          content: response.interviewerReply!.trim()
+        }]);
+      }
+
       if (response.hasNextQuestion && response.nextQuestion) {
         setCurrentQuestion(response.nextQuestion);
         setMessages(prev => [...prev, {

@@ -17,7 +17,6 @@
 |------|------|------|
 {allocationTable}
 
-## 候选人简历
 {resumeSection}
 
 ## 已考知识点（避免重复）
