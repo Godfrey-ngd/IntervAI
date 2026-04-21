@@ -61,6 +61,13 @@ public class InterviewSessionEntity {
     
     // 总分 (0-100)
     private Integer overallScore;
+
+    // 五维能力评分（0-100）
+    private Integer technicalDepthScore;
+    private Integer communicationScore;
+    private Integer logicalThinkingScore;
+    private Integer projectExperienceScore;
+    private Integer adaptabilityScore;
     
     // 总体评价
     @Column(columnDefinition = "TEXT")
@@ -181,6 +188,46 @@ public class InterviewSessionEntity {
     
     public void setOverallScore(Integer overallScore) {
         this.overallScore = overallScore;
+    }
+
+    public Integer getTechnicalDepthScore() {
+        return technicalDepthScore;
+    }
+
+    public void setTechnicalDepthScore(Integer technicalDepthScore) {
+        this.technicalDepthScore = technicalDepthScore;
+    }
+
+    public Integer getCommunicationScore() {
+        return communicationScore;
+    }
+
+    public void setCommunicationScore(Integer communicationScore) {
+        this.communicationScore = communicationScore;
+    }
+
+    public Integer getLogicalThinkingScore() {
+        return logicalThinkingScore;
+    }
+
+    public void setLogicalThinkingScore(Integer logicalThinkingScore) {
+        this.logicalThinkingScore = logicalThinkingScore;
+    }
+
+    public Integer getProjectExperienceScore() {
+        return projectExperienceScore;
+    }
+
+    public void setProjectExperienceScore(Integer projectExperienceScore) {
+        this.projectExperienceScore = projectExperienceScore;
+    }
+
+    public Integer getAdaptabilityScore() {
+        return adaptabilityScore;
+    }
+
+    public void setAdaptabilityScore(Integer adaptabilityScore) {
+        this.adaptabilityScore = adaptabilityScore;
     }
     
     public String getOverallFeedback() {

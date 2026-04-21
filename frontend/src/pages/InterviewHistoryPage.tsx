@@ -1,6 +1,7 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {AnimatePresence, motion} from 'framer-motion';
+import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {historyApi} from '../api/history';
 import {interviewApi, type TextSessionMeta} from '../api/interview';
 import {voiceInterviewApi, SessionMeta} from '../api/voiceInterview';
@@ -9,6 +10,7 @@ import {getScoreProgressColor} from '../utils/score';
 import {skillApi, type SkillDTO} from '../api/skill';
 import {getTemplateName} from '../utils/voiceInterview';
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
+import RadarChart from '../components/RadarChart';
 import {
   AlertCircle,
   CheckCircle,
@@ -43,6 +45,11 @@ interface UnifiedInterviewItem {
   createdAt: string;
   resumeId?: number;
   voiceSessionId?: number;
+  technicalDepthScore?: number;
+  communicationScore?: number;
+  logicalThinkingScore?: number;
+  projectExperienceScore?: number;
+  adaptabilityScore?: number;
 }
 
 interface InterviewStats {
@@ -162,7 +169,12 @@ function itemsEqual(a: UnifiedInterviewItem[], b: UnifiedInterviewItem[]): boole
   for (let i = 0; i < a.length; i++) {
     const ai = a[i], bi = b[i];
     if (ai.id !== bi.id || ai.status !== bi.status ||
-        ai.evaluateStatus !== bi.evaluateStatus || ai.overallScore !== bi.overallScore) return false;
+        ai.evaluateStatus !== bi.evaluateStatus || ai.overallScore !== bi.overallScore ||
+        ai.technicalDepthScore !== bi.technicalDepthScore ||
+        ai.communicationScore !== bi.communicationScore ||
+        ai.logicalThinkingScore !== bi.logicalThinkingScore ||
+        ai.projectExperienceScore !== bi.projectExperienceScore ||
+        ai.adaptabilityScore !== bi.adaptabilityScore) return false;
   }
   return true;
 }
@@ -177,6 +189,7 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
   const [deleteItem, setDeleteItem] = useState<UnifiedInterviewItem | null>(null);
   const [exporting, setExporting] = useState<string | null>(null);
+  const [radarMode, setRadarMode] = useState<'overall' | 'recent3'>('overall');
   const pollingRef = useRef<number | null>(null);
   const skillsRef = useRef<SkillDTO[]>([]);
   const skillsLoadedRef = useRef(false);
@@ -244,6 +257,11 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
         evaluateStatus: session.evaluateStatus ?? undefined,
         evaluateError: session.evaluateError ?? undefined,
         overallScore: session.overallScore,
+        technicalDepthScore: session.technicalDepthScore ?? undefined,
+        communicationScore: session.communicationScore ?? undefined,
+        logicalThinkingScore: session.logicalThinkingScore ?? undefined,
+        projectExperienceScore: session.projectExperienceScore ?? undefined,
+        adaptabilityScore: session.adaptabilityScore ?? undefined,
         totalQuestions: session.totalQuestions,
         createdAt: session.createdAt,
         resumeId: session.resumeId ?? undefined,
@@ -357,6 +375,58 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
     return true;
   });
 
+  const evaluatedTextItems = useMemo(() => {
+    return items
+      .filter(item =>
+        item.type === 'text' &&
+        isEvaluateCompleted(item) &&
+        item.overallScore !== null
+      )
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }, [items]);
+
+  const radarSource = useMemo(() => {
+    if (evaluatedTextItems.length === 0) return [];
+    if (radarMode === 'recent3') return evaluatedTextItems.slice(-3);
+    return evaluatedTextItems;
+  }, [evaluatedTextItems, radarMode]);
+
+  const radarData = useMemo(() => {
+    if (radarSource.length === 0) return [];
+
+    const avg = (selector: (item: UnifiedInterviewItem) => number | undefined) => {
+      const values = radarSource
+        .map(item => selector(item) ?? item.overallScore ?? 0)
+        .filter((v): v is number => v != null);
+      if (values.length === 0) return 0;
+      return Math.round(values.reduce((sum, current) => sum + current, 0) / values.length);
+    };
+
+    return [
+      { subject: '技术深度', score: avg(item => item.technicalDepthScore), fullMark: 100 },
+      { subject: '沟通表达', score: avg(item => item.communicationScore), fullMark: 100 },
+      { subject: '逻辑思维', score: avg(item => item.logicalThinkingScore), fullMark: 100 },
+      { subject: '项目经验', score: avg(item => item.projectExperienceScore), fullMark: 100 },
+      { subject: '应变能力', score: avg(item => item.adaptabilityScore), fullMark: 100 },
+    ];
+  }, [radarSource]);
+
+  const trendData = useMemo(() => {
+    return evaluatedTextItems.map((item, index, list) => {
+      const start = Math.max(0, index - 2);
+      const recent = list.slice(start, index + 1);
+      const practiceScore = Math.round(
+        recent.reduce((sum, current) => sum + (current.overallScore ?? 0), 0) / recent.length
+      );
+
+      return {
+        date: formatDate(item.createdAt, { month: 'numeric', day: 'numeric' }),
+        interviewScore: item.overallScore ?? 0,
+        practiceScore,
+      };
+    });
+  }, [evaluatedTextItems]);
+
   return (
     <motion.div className="mx-auto w-full max-w-7xl space-y-6 pb-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Header */}
@@ -406,6 +476,106 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
           <StatCard icon={Users} label="面试总数" value={stats.totalCount} color="bg-primary-500" />
           <StatCard icon={CheckCircle} label="已完成" value={stats.completedCount} color="bg-emerald-500" />
           <StatCard icon={TrendingUp} label="平均分数" value={stats.averageScore} suffix="分" color="bg-indigo-500" />
+        </div>
+      )}
+
+      {radarData.length > 0 && (
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <motion.div
+            className="surface-card p-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-semibold text-slate-800 dark:text-white">能力分析</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setRadarMode('overall')}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    radarMode === 'overall'
+                      ? 'bg-primary-500 text-white'
+                      : 'border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+                  }`}
+                >
+                  整体评价
+                </button>
+                <button
+                  onClick={() => setRadarMode('recent3')}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    radarMode === 'recent3'
+                      ? 'bg-primary-500 text-white'
+                      : 'border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+                  }`}
+                >
+                  最近3次
+                </button>
+              </div>
+            </div>
+            <RadarChart data={radarData} height={320} />
+          </motion.div>
+
+          <motion.div
+            className="surface-card p-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+          >
+            <div className="mb-4 flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary-500" />
+              <span className="text-lg font-semibold text-slate-800 dark:text-white">分数趋势</span>
+            </div>
+            <div className="h-[320px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trendData} margin={{ top: 12, right: 24, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
+                  <XAxis
+                    dataKey="date"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#64748b', fontSize: 12 }}
+                  />
+                  <YAxis
+                    domain={[0, 100]}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#64748b', fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px'
+                    }}
+                    formatter={(value: number | undefined, name: string | undefined) => {
+                      const safeValue = value ?? 0;
+                      return [
+                        `${safeValue} 分`,
+                        name === 'interviewScore' ? '面试分数' : '练习分数'
+                      ];
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="interviewScore"
+                    name="interviewScore"
+                    stroke="#2563eb"
+                    strokeWidth={2.5}
+                    dot={{ r: 4 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="practiceScore"
+                    name="practiceScore"
+                    stroke="#0d9488"
+                    strokeWidth={2.5}
+                    dot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
         </div>
       )}
 

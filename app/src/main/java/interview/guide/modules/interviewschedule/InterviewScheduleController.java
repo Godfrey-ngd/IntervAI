@@ -74,9 +74,11 @@ public class InterviewScheduleController {
      */
     @GetMapping
     public Result<List<InterviewScheduleDTO>> getAll(
-        @RequestParam(required = false) String status,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
+        @RequestParam(name = "status", required = false) String status,
+        @RequestParam(name = "start", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+        @RequestParam(name = "end", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
     ) {
         List<InterviewScheduleDTO> list = scheduleService.getAll(status, start, end);
         return Result.success(list);
@@ -122,7 +124,7 @@ public class InterviewScheduleController {
     @RequestMapping(path = "/{id}/status", method = {RequestMethod.PATCH, RequestMethod.PUT})
     public Result<InterviewScheduleDTO> updateStatus(
         @PathVariable Long id,
-        @RequestParam InterviewStatus status
+        @RequestParam(name = "status") InterviewStatus status
     ) {
         log.info("更新面试状态: ID={}, status={}", id, status);
         InterviewScheduleDTO dto = scheduleService.updateStatus(id, status);

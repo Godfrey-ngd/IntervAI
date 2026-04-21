@@ -39,6 +39,7 @@ public class InterviewPersistenceService {
     private final InterviewAnswerRepository answerRepository;
     private final ResumeRepository resumeRepository;
     private final ObjectMapper objectMapper;
+    private final InterviewDimensionScoreService dimensionScoreService;
     
     /**
      * 保存新的面试会话（支持可选简历）
@@ -179,6 +180,15 @@ public class InterviewPersistenceService {
             session.setStrengthsJson(objectMapper.writeValueAsString(report.strengths()));
             session.setImprovementsJson(objectMapper.writeValueAsString(report.improvements()));
             session.setReferenceAnswersJson(objectMapper.writeValueAsString(report.referenceAnswers()));
+
+            InterviewDimensionScoreService.DimensionScores dimensionScores =
+                dimensionScoreService.calculate(report.questionDetails(), report.overallScore());
+            session.setTechnicalDepthScore(dimensionScores.technicalDepthScore());
+            session.setCommunicationScore(dimensionScores.communicationScore());
+            session.setLogicalThinkingScore(dimensionScores.logicalThinkingScore());
+            session.setProjectExperienceScore(dimensionScores.projectExperienceScore());
+            session.setAdaptabilityScore(dimensionScores.adaptabilityScore());
+
             session.setStatus(InterviewSessionEntity.SessionStatus.EVALUATED);
             session.setCompletedAt(LocalDateTime.now());
 
