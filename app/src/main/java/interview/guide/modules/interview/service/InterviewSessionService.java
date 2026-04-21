@@ -48,6 +48,7 @@ public class InterviewSessionService {
     private final LlmProviderRegistry llmProviderRegistry;
     private final InterviewerPersonaService interviewerPersonaService;
     private final FollowUpGenerationService followUpGenerationService;
+    private final InterviewFlowService interviewFlowService;
 
     /**
      * 创建新的面试会话
@@ -92,6 +93,7 @@ public class InterviewSessionService {
             request.jdText(),
             personaType
         );
+        questions = interviewFlowService.applyTextFlow(questions);
 
         // 保存到 Redis 缓存
         sessionCache.saveSession(
