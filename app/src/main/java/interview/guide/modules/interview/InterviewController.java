@@ -60,7 +60,7 @@ public class InterviewController {
      * 获取会话信息
      */
     @GetMapping("/api/interview/sessions/{sessionId}")
-    public Result<InterviewSessionDTO> getSession(@PathVariable String sessionId) {
+    public Result<InterviewSessionDTO> getSession(@PathVariable("sessionId") String sessionId) {
         InterviewSessionDTO session = sessionService.getSession(sessionId);
         return Result.success(session);
     }
@@ -69,7 +69,7 @@ public class InterviewController {
      * 获取当前问题
      */
     @GetMapping("/api/interview/sessions/{sessionId}/question")
-    public Result<Map<String, Object>> getCurrentQuestion(@PathVariable String sessionId) {
+    public Result<Map<String, Object>> getCurrentQuestion(@PathVariable("sessionId") String sessionId) {
         return Result.success(sessionService.getCurrentQuestionResponse(sessionId));
     }
     
@@ -79,7 +79,7 @@ public class InterviewController {
     @PostMapping("/api/interview/sessions/{sessionId}/answers")
     @RateLimit(dimension = RateLimit.Dimension.GLOBAL, count = 10)
     public Result<SubmitAnswerResponse> submitAnswer(
-            @PathVariable String sessionId,
+            @PathVariable("sessionId") String sessionId,
             @RequestBody Map<String, Object> body) {
         Integer questionIndex = (Integer) body.get("questionIndex");
         String answer = (String) body.get("answer");
@@ -93,7 +93,7 @@ public class InterviewController {
      * 生成面试报告
      */
     @GetMapping("/api/interview/sessions/{sessionId}/report")
-    public Result<InterviewReportDTO> getReport(@PathVariable String sessionId) {
+    public Result<InterviewReportDTO> getReport(@PathVariable("sessionId") String sessionId) {
         log.info("生成面试报告: {}", sessionId);
         InterviewReportDTO report = sessionService.generateReport(sessionId);
         return Result.success(report);
@@ -104,7 +104,7 @@ public class InterviewController {
      * GET /api/interview/sessions/unfinished/{resumeId}
      */
     @GetMapping("/api/interview/sessions/unfinished/{resumeId}")
-    public Result<InterviewSessionDTO> findUnfinishedSession(@PathVariable Long resumeId) {
+    public Result<InterviewSessionDTO> findUnfinishedSession(@PathVariable("resumeId") Long resumeId) {
         return Result.success(sessionService.findUnfinishedSessionOrThrow(resumeId));
     }
     
@@ -113,7 +113,7 @@ public class InterviewController {
      */
     @PutMapping("/api/interview/sessions/{sessionId}/answers")
     public Result<Void> saveAnswer(
-            @PathVariable String sessionId,
+            @PathVariable("sessionId") String sessionId,
             @RequestBody Map<String, Object> body) {
         Integer questionIndex = (Integer) body.get("questionIndex");
         String answer = (String) body.get("answer");
@@ -127,7 +127,7 @@ public class InterviewController {
      * 提前交卷
      */
     @PostMapping("/api/interview/sessions/{sessionId}/complete")
-    public Result<Void> completeInterview(@PathVariable String sessionId) {
+    public Result<Void> completeInterview(@PathVariable("sessionId") String sessionId) {
         log.info("提前交卷: {}", sessionId);
         sessionService.completeInterview(sessionId);
         return Result.success(null);
@@ -138,7 +138,7 @@ public class InterviewController {
      * GET /api/interview/sessions/{sessionId}/details
      */
     @GetMapping("/api/interview/sessions/{sessionId}/details")
-    public Result<InterviewDetailDTO> getInterviewDetail(@PathVariable String sessionId) {
+    public Result<InterviewDetailDTO> getInterviewDetail(@PathVariable("sessionId") String sessionId) {
         InterviewDetailDTO detail = historyService.getInterviewDetail(sessionId);
         return Result.success(detail);
     }
@@ -147,7 +147,7 @@ public class InterviewController {
      * 导出面试报告为PDF
      */
     @GetMapping("/api/interview/sessions/{sessionId}/export")
-    public ResponseEntity<byte[]> exportInterviewPdf(@PathVariable String sessionId) {
+    public ResponseEntity<byte[]> exportInterviewPdf(@PathVariable("sessionId") String sessionId) {
         try {
             byte[] pdfBytes = historyService.exportInterviewPdf(sessionId);
             String filename = URLEncoder.encode("模拟面试报告_" + sessionId + ".pdf", 
@@ -167,7 +167,7 @@ public class InterviewController {
      * 删除面试会话
      */
     @DeleteMapping("/api/interview/sessions/{sessionId}")
-    public Result<Void> deleteInterview(@PathVariable String sessionId) {
+    public Result<Void> deleteInterview(@PathVariable("sessionId") String sessionId) {
         log.info("删除面试会话: {}", sessionId);
         persistenceService.deleteSessionBySessionId(sessionId);
         return Result.success(null);
