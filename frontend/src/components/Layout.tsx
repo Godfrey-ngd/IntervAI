@@ -5,15 +5,19 @@ import {
   Database,
   FileStack,
   History,
+  LogIn,
+  LogOut,
   Moon,
   Sparkles,
   Sun,
   Upload,
+  UserCircle2,
   WandSparkles,
 } from 'lucide-react';
 import {useTheme} from '../hooks/useTheme';
 import {useState} from 'react';
 import UnifiedInterviewModal, {UnifiedInterviewConfig} from './UnifiedInterviewModal';
+import { useAuthSession } from '../hooks/useAuthSession';
 
 interface NavItem {
   id: string;
@@ -28,6 +32,7 @@ export default function Layout() {
   const currentPath = location.pathname;
   const {theme, toggleTheme} = useTheme();
   const navigate = useNavigate();
+  const { session, logout } = useAuthSession();
   const [interviewModalPreset, setInterviewModalPreset] = useState<{
     defaultMode: 'text' | 'voice';
     defaultResumeId?: number;
@@ -149,6 +154,40 @@ export default function Layout() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
+            {session ? (
+              <div className="hidden items-center gap-2 sm:flex">
+                <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                  <UserCircle2 className="h-4 w-4 text-primary-500" />
+                  <span className="max-w-[120px] truncate">{session.user.displayName}</span>
+                </div>
+                <button
+                  onClick={async () => {
+                    await logout();
+                    navigate('/history');
+                  }}
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-primary-200 hover:text-primary-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-primary-800 dark:hover:text-primary-300"
+                >
+                  <LogOut className="h-4 w-4" />
+                  退出
+                </button>
+              </div>
+            ) : (
+              <div className="hidden items-center gap-2 sm:flex">
+                <button
+                  onClick={() => navigate('/auth?mode=login')}
+                  className="nav-pill"
+                >
+                  <LogIn className="h-4 w-4" />
+                  登录
+                </button>
+                <button
+                  onClick={() => navigate('/auth?mode=register')}
+                  className="gradient-button"
+                >
+                  注册
+                </button>
+              </div>
+            )}
             <button
               onClick={() => navigate('/upload')}
               className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-primary-200 hover:text-primary-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-primary-800 dark:hover:text-primary-300 md:inline-flex"

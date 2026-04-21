@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { getAuthToken } from '../utils/auth';
 
 /**
  * 后端统一响应结构
@@ -14,6 +15,16 @@ const baseURL = import.meta.env.PROD ? '' : 'http://localhost:8080';
 const instance: AxiosInstance = axios.create({
   baseURL,
   timeout: 60000,
+});
+
+instance.interceptors.request.use((config) => {
+  const token = getAuthToken();
+  if (token) {
+    config.headers = config.headers ?? {};
+    (config.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+
+  return config;
 });
 
 /**

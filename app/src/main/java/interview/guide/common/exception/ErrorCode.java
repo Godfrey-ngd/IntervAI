@@ -18,6 +18,13 @@ public enum ErrorCode {
     NOT_FOUND(404, "资源不存在"),
     METHOD_NOT_ALLOWED(405, "请求方法不支持"),
     INTERNAL_ERROR(500, "服务器内部错误"),
+
+    // ========== 认证模块错误 11xxx ==========
+    AUTH_USER_EXISTS(11001, "用户名或邮箱已存在"),
+    AUTH_INVALID_CREDENTIALS(11002, "账号或密码错误"),
+    AUTH_TOKEN_MISSING(11003, "未携带登录令牌"),
+    AUTH_TOKEN_INVALID(11004, "登录状态已失效"),
+    AUTH_USER_DISABLED(11005, "账号已被禁用"),
     
     // ========== 简历模块错误 2xxx ==========
     RESUME_NOT_FOUND(2001, "简历不存在"),
