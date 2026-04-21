@@ -163,6 +163,7 @@ app:
     secret-key: ${APP_STORAGE_SECRET_KEY:minioadmin}
     bucket: ${APP_STORAGE_BUCKET:interview-guide}
     region: ${APP_STORAGE_REGION:us-east-1}
+    auto-create-bucket: ${APP_STORAGE_AUTO_CREATE_BUCKET:true}
   
   # CORS配置 - React前端
   cors:

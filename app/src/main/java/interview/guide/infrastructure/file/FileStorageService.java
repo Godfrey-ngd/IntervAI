@@ -179,24 +179,25 @@ public class FileStorageService {
     }
 
     /**
-     * 确保存储桶存在
+     * 确保存储桶存在（不存在则创建）。由 {@link StorageBucketBootstrap} 在启动时调用。
      */
     public void ensureBucketExists() {
+        String bucket = storageConfig.getBucket();
         try {
-            HeadBucketRequest headRequest = HeadBucketRequest.builder()
-                    .bucket(storageConfig.getBucket())
-                    .build();
-            s3Client.headBucket(headRequest);
-            log.info("存储桶已存在: {}", storageConfig.getBucket());
+            s3Client.headBucket(HeadBucketRequest.builder().bucket(bucket).build());
+            log.info("存储桶已存在: {}", bucket);
         } catch (NoSuchBucketException e) {
-            log.info("存储桶不存在，正在创建: {}", storageConfig.getBucket());
-            CreateBucketRequest createRequest = CreateBucketRequest.builder()
-                    .bucket(storageConfig.getBucket())
-                    .build();
-            s3Client.createBucket(createRequest);
-            log.info("存储桶创建成功: {}", storageConfig.getBucket());
+            log.info("存储桶不存在，正在创建: {}", bucket);
+            try {
+                s3Client.createBucket(CreateBucketRequest.builder().bucket(bucket).build());
+                log.info("存储桶创建成功: {}", bucket);
+            } catch (BucketAlreadyOwnedByYouException | BucketAlreadyExistsException race) {
+                log.info("存储桶已存在（并发创建）: {}", bucket);
+            }
         } catch (S3Exception e) {
-            log.error("检查存储桶失败: {}", e.getMessage(), e);
+            log.error("检查或初始化存储桶失败: bucket={}", bucket, e);
+            throw new IllegalStateException(
+                "S3 存储桶不可用，请检查 APP_STORAGE_* 与对象存储是否已启动: " + e.getMessage(), e);
         }
     }
 
