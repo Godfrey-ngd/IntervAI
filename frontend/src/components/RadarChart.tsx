@@ -18,12 +18,13 @@ interface RadarChartProps {
   }>;
   height?: number;
   className?: string;
+  showSeries?: boolean;
 }
 
 /**
  * 雷达图组件（自动归一化到统一比例）
  */
-export default function RadarChart({ data, height = 320, className = '' }: RadarChartProps) {
+export default function RadarChart({ data, height = 320, className = '', showSeries = true }: RadarChartProps) {
   // 归一化数据：将所有维度归一化到最大满分
   const normalizedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -71,30 +72,34 @@ export default function RadarChart({ data, height = 320, className = '' }: Radar
             tick={{fill: tickColor, fontSize: 10}}
             tickFormatter={(value) => value.toString()}
           />
-          <Radar
-            name="得分"
-            dataKey="score"
-            stroke="#6366f1"
-            fill="#6366f1"
-            fillOpacity={0.6}
-            strokeWidth={2}
-          />
-          <Tooltip
-            contentStyle={{
-                backgroundColor: tooltipBg,
-                border: `1px solid ${tooltipBorder}`,
-              borderRadius: '12px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-            }}
-            formatter={(_value: number | undefined, _name: string | undefined, props: any) => {
-              const originalScore = props?.payload?.originalScore ?? 0;
-              const originalFullMark = props?.payload?.originalFullMark ?? 40;
-                const percentage = originalFullMark > 0
+          {showSeries && (
+            <>
+              <Radar
+                name="得分"
+                dataKey="score"
+                stroke="#6366f1"
+                fill="#6366f1"
+                fillOpacity={0.6}
+                strokeWidth={2}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: tooltipBg,
+                  border: `1px solid ${tooltipBorder}`,
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                }}
+                formatter={(_value: number | undefined, _name: string | undefined, props: any) => {
+                  const originalScore = props?.payload?.originalScore ?? 0;
+                  const originalFullMark = props?.payload?.originalFullMark ?? 40;
+                  const percentage = originalFullMark > 0
                     ? Math.round((originalScore / originalFullMark) * 100)
-                : 0;
-              return [`${originalScore}/${originalFullMark} (${percentage}%)`, '得分'];
-            }}
-          />
+                    : 0;
+                  return [`${originalScore}/${originalFullMark} (${percentage}%)`, '得分'];
+                }}
+              />
+            </>
+          )}
         </RechartsRadarChart>
       </ResponsiveContainer>
     </div>

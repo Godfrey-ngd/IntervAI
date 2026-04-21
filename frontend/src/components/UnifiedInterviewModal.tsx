@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  X, Sparkles, FileText, Mic,
+  Briefcase, X, Sparkles, FileText, Mic,
   FileStack, ChevronDown, ChevronUp, Loader2
 } from 'lucide-react';
-import { useInterviewConfig, CUSTOM_SKILL_ID, DIFFICULTY_OPTIONS, type InterviewMode, type Difficulty } from '../hooks/useInterviewConfig';
+import { useInterviewConfig, CUSTOM_SKILL_ID, DIFFICULTY_OPTIONS, EMPLOYMENT_TYPE_OPTIONS, type InterviewMode, type Difficulty } from '../hooks/useInterviewConfig';
 import { getSkillIcon } from '../utils/skillIcons';
+import { getSkillDisplayName } from '../utils/voiceInterview';
 
 // Re-export for backward compatibility
 export type { InterviewMode, Difficulty };
@@ -19,6 +20,7 @@ export interface UnifiedInterviewConfig {
   resumeId?: number;
   resumeText?: string;
   llmProvider: string;
+  employmentType?: import('../hooks/useInterviewConfig').EmploymentType;
   questionCount: number;
   techEnabled: boolean;
   projectEnabled: boolean;
@@ -80,6 +82,7 @@ export default function UnifiedInterviewModal({
       difficulty: config.difficulty,
       resumeId: config.resumeId,
       llmProvider: config.llmProvider,
+      employmentType: config.employmentType,
       questionCount: config.questionCount,
       techEnabled: true,
       projectEnabled: true,
@@ -191,6 +194,56 @@ export default function UnifiedInterviewModal({
                   </div>
                 )}
 
+                {/* 求职类型 */}
+                <div>
+                  <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    求职类型
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {EMPLOYMENT_TYPE_OPTIONS.map(opt => {
+                      const selected = config.employmentType === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => config.setEmploymentType(opt.value)}
+                          className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 text-left
+                            ${selected
+                              ? 'border-primary-500 bg-primary-50/80 dark:bg-primary-900/20'
+                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                            }`}
+                        >
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${selected ? 'bg-primary-100 dark:bg-primary-900/50' : 'bg-slate-100 dark:bg-slate-700'}`}>
+                            <Briefcase className={`w-4 h-4 ${selected ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400'}`} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className={`text-sm font-semibold ${selected ? 'text-primary-700 dark:text-primary-300' : 'text-slate-800 dark:text-slate-200'}`}>
+                              {opt.label}
+                            </p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">{opt.desc}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 规划提示：群面 / 无领导小组 */}
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300">
+                      <Sparkles className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                        群面 / 无领导小组（规划中）
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                        面向产品、市场运营等非代码岗位的后续扩展项，当前版本只保留规划说明，不影响现有流程。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* 面试方向 */}
                 <div>
                   <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -207,6 +260,7 @@ export default function UnifiedInterviewModal({
                         const selected = config.skillId === skill.id;
                         const IconComponent = getSkillIcon(skill.id);
                         const fallbackEmoji = skill.display?.icon || '📋';
+                        const displayName = getSkillDisplayName(skill);
                         return (
                           <button
                             key={skill.id}
@@ -227,7 +281,7 @@ export default function UnifiedInterviewModal({
                             </div>
                             <div className="flex-1 min-w-0">
                               <span className={`text-xs font-medium block truncate ${selected ? 'text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-300'}`}>
-                                {skill.name}
+                                {displayName}
                               </span>
                               <span className="text-[10px] text-slate-400 truncate block">
                                 {skill.description}

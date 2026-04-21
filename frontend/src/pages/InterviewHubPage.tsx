@@ -2,20 +2,21 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ChevronDown, ChevronUp, FileStack, FileText, Loader2, Mic,
+  Briefcase, ChevronDown, ChevronUp, FileStack, FileText, Loader2, Mic,
   RefreshCw, Sparkles,
 } from 'lucide-react';
 import { type SkillDTO } from '../api/skill';
 import { interviewApi, type TextSessionMeta } from '../api/interview';
 import { voiceInterviewApi, type SessionMeta } from '../api/voiceInterview';
 import { getSkillIcon } from '../utils/skillIcons';
-import { getTemplateName } from '../utils/voiceInterview';
+import { getSkillDisplayName, getTemplateName } from '../utils/voiceInterview';
 import { getScoreTextColor } from '../utils/score';
 import { formatDateTime } from '../utils/date';
 import {
   useInterviewConfig,
   CUSTOM_SKILL_ID,
   type InterviewMode,
+  EMPLOYMENT_TYPE_OPTIONS,
   DIFFICULTY_OPTIONS,
 } from '../hooks/useInterviewConfig';
 
@@ -106,6 +107,7 @@ export default function InterviewHubPage() {
             difficulty: config.difficulty,
             questionCount: config.questionCount,
             llmProvider: config.llmProvider,
+            employmentType: config.employmentType,
             jdText: config.isCustomSkill ? config.parsedCustomJdText : undefined,
             customCategories: config.isCustomSkill ? config.customCategories : undefined,
           },
@@ -124,6 +126,7 @@ export default function InterviewHubPage() {
             plannedDuration: config.plannedDuration,
             resumeId: config.resumeId,
             llmProvider: config.llmProvider,
+            employmentType: config.employmentType,
           },
         },
       });
@@ -200,6 +203,58 @@ export default function InterviewHubPage() {
             </div>
           </div>
 
+          {/* 求职类型 */}
+          <div>
+            <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+              求职类型
+            </label>
+            <div className="grid grid-cols-3 gap-3">
+              {EMPLOYMENT_TYPE_OPTIONS.map(opt => {
+                const selected = config.employmentType === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => config.setEmploymentType(opt.value)}
+                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left
+                      ${selected
+                        ? 'border-primary-500 bg-primary-50/80 dark:bg-primary-900/20'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                      }`}
+                  >
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      selected ? 'bg-primary-100 dark:bg-primary-900/50' : 'bg-slate-100 dark:bg-slate-700'
+                    }`}>
+                      <Briefcase className={`w-4 h-4 ${selected ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400'}`} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className={`text-sm font-semibold ${selected ? 'text-primary-700 dark:text-primary-300' : 'text-slate-800 dark:text-slate-200'}`}>
+                        {opt.label}
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">{opt.desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 规划提示：群面 / 无领导小组 */}
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300">
+                <Sparkles className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  群面 / 无领导小组（规划中）
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  适合产品经理、市场运营等非代码岗位。当前版本先保留为规划项，后续可以在这里补充群面角色分工、讨论题和评分规则。
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* 面试方向 */}
           <div>
             <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -216,6 +271,7 @@ export default function InterviewHubPage() {
                   const selected = config.skillId === skill.id;
                   const IconComponent = getSkillIcon(skill.id);
                   const fallbackEmoji = skill.display?.icon || '📋';
+                  const displayName = getSkillDisplayName(skill);
                   return (
                     <button
                       key={skill.id}
@@ -236,7 +292,7 @@ export default function InterviewHubPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className={`text-xs font-medium block truncate ${selected ? 'text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-300'}`}>
-                          {skill.name}
+                          {displayName}
                         </span>
                       </div>
                     </button>

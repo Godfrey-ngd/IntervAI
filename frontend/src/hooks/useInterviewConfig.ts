@@ -6,11 +6,18 @@ import { loadInterviewPreferences } from '../utils/interviewPreferences';
 
 export type InterviewMode = 'text' | 'voice';
 export type Difficulty = 'junior' | 'mid' | 'senior';
+export type EmploymentType = 'full-time' | 'intern' | 'part-time';
 
 export const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; desc: string }[] = [
   { value: 'junior', label: '校招', desc: '0-1 年' },
   { value: 'mid', label: '中级', desc: '1-3 年' },
   { value: 'senior', label: '高级', desc: '3 年+' },
+];
+
+export const EMPLOYMENT_TYPE_OPTIONS: { value: EmploymentType; label: string; desc: string }[] = [
+  { value: 'full-time', label: '全职', desc: '正式岗位 / 社招' },
+  { value: 'intern', label: '实习', desc: '校招 / 实习机会' },
+  { value: 'part-time', label: '兼职', desc: '灵活用工 / 兼职岗位' },
 ];
 
 export const CUSTOM_SKILL_ID = 'custom';
@@ -28,6 +35,7 @@ export interface InterviewConfigState {
   resumeId: number | undefined;
   resumes: ResumeListItem[];
   llmProvider: string;
+  employmentType: EmploymentType;
   questionCount: number;
   plannedDuration: number;
   customJdText: string;
@@ -57,6 +65,7 @@ export function useInterviewConfig(options?: {
   const [questionCount, setQuestionCount] = useState<number>(6);
   const [plannedDuration, setPlannedDuration] = useState(30);
   const [llmProvider, setLlmProvider] = useState(preferences.defaultLlmProvider);
+  const [employmentType, setEmploymentType] = useState<EmploymentType>('full-time');
   const [customJdText, setCustomJdText] = useState('');
   const [parsedCustomJdText, setParsedCustomJdText] = useState('');
   const [customCategories, setCustomCategories] = useState<CategoryDTO[]>([]);
@@ -133,6 +142,7 @@ export function useInterviewConfig(options?: {
     questionCount, setQuestionCount,
     plannedDuration, setPlannedDuration,
     llmProvider, setLlmProvider,
+    employmentType, setEmploymentType,
     customJdText, setCustomJdText,
     parsedCustomJdText,
     customCategories,

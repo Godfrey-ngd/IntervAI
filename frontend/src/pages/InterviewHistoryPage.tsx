@@ -58,6 +58,13 @@ interface InterviewStats {
   averageScore: number;
 }
 
+interface TrendDatum {
+  label: string;
+  date: string;
+  interviewScore: number | null;
+  practiceScore: number | null;
+}
+
 function isCompletedStatus(status: string): boolean {
   return status === 'COMPLETED' || status === 'EVALUATED';
 }
@@ -420,12 +427,32 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
       );
 
       return {
+        label: `第${index + 1}次`,
         date: formatDate(item.createdAt, { month: 'numeric', day: 'numeric' }),
         interviewScore: item.overallScore ?? 0,
         practiceScore,
-      };
+      } satisfies TrendDatum;
     });
   }, [evaluatedTextItems]);
+
+  const radarDisplayData = useMemo(() => {
+    if (radarData.length > 0) return radarData;
+    return [
+      { subject: '技术深度', score: 0, fullMark: 100 },
+      { subject: '沟通表达', score: 0, fullMark: 100 },
+      { subject: '逻辑思维', score: 0, fullMark: 100 },
+      { subject: '项目经验', score: 0, fullMark: 100 },
+      { subject: '应变能力', score: 0, fullMark: 100 },
+    ];
+  }, [radarData]);
+
+  const trendDisplayData = useMemo(() => {
+    if (trendData.length > 0) return trendData;
+    return [
+      { label: '第1次', date: '起点', interviewScore: null, practiceScore: null },
+      { label: '第2次', date: '当前', interviewScore: null, practiceScore: null },
+    ] satisfies TrendDatum[];
+  }, [trendData]);
 
   return (
     <motion.div className="mx-auto w-full max-w-7xl space-y-6 pb-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -479,105 +506,112 @@ export default function InterviewHistoryPage({ onBack: _onBack, onViewInterview,
         </div>
       )}
 
-      {radarData.length > 0 && (
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <motion.div
-            className="surface-card p-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold text-slate-800 dark:text-white">能力分析</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setRadarMode('overall')}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                    radarMode === 'overall'
-                      ? 'bg-primary-500 text-white'
-                      : 'border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
-                  }`}
-                >
-                  整体评价
-                </button>
-                <button
-                  onClick={() => setRadarMode('recent3')}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                    radarMode === 'recent3'
-                      ? 'bg-primary-500 text-white'
-                      : 'border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
-                  }`}
-                >
-                  最近3次
-                </button>
-              </div>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <motion.div
+          className="surface-card p-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold text-slate-800 dark:text-white">能力分析</span>
             </div>
-            <RadarChart data={radarData} height={320} />
-          </motion.div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setRadarMode('overall')}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                  radarMode === 'overall'
+                    ? 'bg-primary-500 text-white'
+                    : 'border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+                }`}
+              >
+                整体评价
+              </button>
+              <button
+                onClick={() => setRadarMode('recent3')}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                  radarMode === 'recent3'
+                    ? 'bg-primary-500 text-white'
+                    : 'border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+                }`}
+              >
+                最近3次
+              </button>
+            </div>
+          </div>
+          <RadarChart data={radarDisplayData} showSeries={radarData.length > 0} height={320} />
+          {radarData.length === 0 && (
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">暂无有效面试数据</p>
+          )}
+        </motion.div>
 
-          <motion.div
-            className="surface-card p-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-          >
-            <div className="mb-4 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary-500" />
-              <span className="text-lg font-semibold text-slate-800 dark:text-white">分数趋势</span>
-            </div>
-            <div className="h-[320px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trendData} margin={{ top: 12, right: 24, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
-                  <XAxis
-                    dataKey="date"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12 }}
-                  />
-                  <YAxis
-                    domain={[0, 100]}
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px'
-                    }}
-                    formatter={(value: number | undefined, name: string | undefined) => {
-                      const safeValue = value ?? 0;
-                      return [
-                        `${safeValue} 分`,
-                        name === 'interviewScore' ? '面试分数' : '练习分数'
-                      ];
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="interviewScore"
-                    name="interviewScore"
-                    stroke="#2563eb"
-                    strokeWidth={2.5}
-                    dot={{ r: 4 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="practiceScore"
-                    name="practiceScore"
-                    stroke="#0d9488"
-                    strokeWidth={2.5}
-                    dot={{ r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
-        </div>
-      )}
+        <motion.div
+          className="surface-card p-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <div className="mb-4 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary-500" />
+            <span className="text-lg font-semibold text-slate-800 dark:text-white">分数趋势</span>
+          </div>
+          <div className="h-[320px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={trendDisplayData} margin={{ top: 12, right: 24, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="4 4" stroke="#cbd5e1" vertical horizontal />
+                <XAxis
+                  dataKey="label"
+                  axisLine
+                  tickLine={false}
+                  interval={0}
+                  tick={{ fill: '#64748b', fontSize: 12 }}
+                />
+                <YAxis
+                  domain={[50, 100]}
+                  axisLine
+                  tickLine={false}
+                  ticks={[50, 65, 80, 100]}
+                  allowDataOverflow
+                  tick={{ fill: '#64748b', fontSize: 12 }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px'
+                  }}
+                  formatter={(value: number | undefined, name: string | undefined) => {
+                    const safeValue = value ?? 0;
+                    return [
+                      `${safeValue} 分`,
+                      name === 'interviewScore' ? '面试分数' : '练习分数'
+                    ];
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="interviewScore"
+                  name="interviewScore"
+                  stroke="#2563eb"
+                  strokeWidth={2.5}
+                  dot={{ r: 4 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="practiceScore"
+                  name="practiceScore"
+                  stroke="#0d9488"
+                  strokeWidth={2.5}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          {trendData.length === 0 && (
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">暂无有效面试数据</p>
+          )}
+        </motion.div>
+      </div>
 
       {/* Type filter tabs */}
       <div className="surface-card flex items-center gap-2 p-3">
