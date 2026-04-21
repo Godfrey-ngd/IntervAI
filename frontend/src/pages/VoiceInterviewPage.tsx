@@ -61,6 +61,7 @@ export default function VoiceInterviewPage() {
   const autoStartRef = useRef(false);
   const endedByUserRef = useRef(false);
   const isAiSpeakingRef = useRef(false);
+  const live2dMouthElRef = useRef<HTMLDivElement | null>(null);
   const lastAiCommittedTextRef = useRef('');
   const pendingAiTextCommitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Chunked audio playback refs
@@ -72,6 +73,166 @@ export default function VoiceInterviewPage() {
   // Ref to track latest aiText for async callbacks (avoids stale closure)
   const aiTextRef = useRef('');
   useEffect(() => { aiTextRef.current = aiText; }, [aiText]);
+
+  useEffect(() => {
+    const WAIFU_CSS_ID = 'live2d-waifu-css';
+    const WAIFU_TIPS_JS_ID = 'live2d-waifu-tips-js';
+    const MOUTH_ID = 'live2d-mouth-overlay';
+    const LIVE2D_PATH = 'https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.0-rc.6/dist/';
+
+    const ensureMouthOverlay = () => {
+      const waifu = document.getElementById('waifu') as HTMLElement | null;
+      if (!waifu) {
+        return false;
+      }
+      let canvas = waifu.querySelector('canvas') as HTMLCanvasElement | null;
+      if (!canvas) {
+        const candidate = document.querySelector('canvas#live2d, #live2d') as HTMLElement | null;
+        if (candidate) {
+          canvas = (candidate.tagName === 'CANVAS'
+            ? candidate
+            : candidate.querySelector('canvas')) as HTMLCanvasElement | null;
+        }
+      }
+
+      waifu.style.pointerEvents = 'none';
+
+      let mouth = document.getElementById(MOUTH_ID) as HTMLDivElement | null;
+      if (!mouth) {
+        mouth = document.createElement('div');
+        mouth.id = MOUTH_ID;
+        mouth.className = 'live2d-mouth';
+        document.body.appendChild(mouth);
+      }
+
+      const rect = waifu.getBoundingClientRect();
+      const left = rect.left + rect.width * 0.32;
+      const top = rect.top + rect.height * 0.73;
+      mouth.style.left = `${Math.round(left)}px`;
+      mouth.style.top = `${Math.round(top)}px`;
+      mouth.style.display = '';
+
+      live2dMouthElRef.current = mouth;
+      mouth.classList.toggle('live2d-mouth--talking', isAiSpeakingRef.current);
+      return true;
+    };
+
+    const waitForWaifu = () => {
+      let attempts = 0;
+      const timer = setInterval(() => {
+        attempts += 1;
+        if (ensureMouthOverlay() || attempts > 120) {
+          clearInterval(timer);
+        }
+      }, 250);
+      return () => clearInterval(timer);
+    };
+
+    const ensureCss = () => {
+      const existing = document.getElementById(WAIFU_CSS_ID) as HTMLLinkElement | null;
+      if (existing) return existing;
+      const link = document.createElement('link');
+      link.id = WAIFU_CSS_ID;
+      link.rel = 'stylesheet';
+      link.href = LIVE2D_PATH + 'waifu.css';
+      document.head.appendChild(link);
+      return link;
+    };
+
+    const ensureTipsScript = (onLoaded: () => void) => {
+      const existing = document.getElementById(WAIFU_TIPS_JS_ID) as HTMLScriptElement | null;
+      if (existing) {
+        onLoaded();
+        return;
+      }
+      const s = document.createElement('script');
+      s.id = WAIFU_TIPS_JS_ID;
+      s.type = 'module';
+      s.src = LIVE2D_PATH + 'waifu-tips.js';
+      s.onload = () => onLoaded();
+      document.head.appendChild(s);
+    };
+
+    const initLive2d = () => {
+      const anyWindow = window as unknown as Record<string, any>;
+      const initWidget = anyWindow.initWidget as undefined | ((cfg: any) => void);
+      if (!initWidget) {
+        return;
+      }
+      document.getElementById('waifu')?.remove();
+      document.getElementById('waifu-toggle')?.remove();
+      localStorage.removeItem('waifu-display');
+      sessionStorage.removeItem('waifu-message-priority');
+      initWidget({
+        waifuPath: '/live2d/waifu-tips-interviewer.json',
+        cdnPath: 'https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/',
+        cubism2Path: LIVE2D_PATH + 'live2d.min.js',
+        cubism5Path: 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js',
+        tools: ['switch-model', 'switch-texture', 'quit'],
+        logLevel: 'warn',
+        drag: false,
+      });
+    };
+
+    ensureCss();
+    ensureTipsScript(() => {
+      let attempts = 0;
+      const timer = setInterval(() => {
+        attempts += 1;
+        initLive2d();
+        if ((window as any).initWidget || attempts > 40) {
+          clearInterval(timer);
+        }
+      }, 250);
+    });
+
+    const cancel = waitForWaifu();
+
+    return () => {
+      cancel();
+    };
+  }, []);
+
+  useEffect(() => {
+    const mouth = live2dMouthElRef.current;
+    if (mouth) {
+      mouth.classList.toggle('live2d-mouth--talking', isAiSpeaking);
+    }
+    const waifu = document.getElementById('waifu') as HTMLElement | null;
+    if (waifu) {
+      waifu.style.display = avatarVideoUrl ? 'none' : '';
+    }
+  }, [isAiSpeaking, avatarVideoUrl]);
+
+  useEffect(() => {
+    const tick = () => {
+      const mouth = live2dMouthElRef.current;
+      if (!mouth || avatarVideoUrl) {
+        return;
+      }
+      const waifu = document.getElementById('waifu') as HTMLElement | null;
+      let canvas = waifu?.querySelector('canvas') as HTMLCanvasElement | null;
+      if (!canvas) {
+        const candidate = document.querySelector('canvas#live2d, #live2d') as HTMLElement | null;
+        if (candidate) {
+          canvas = (candidate.tagName === 'CANVAS'
+            ? candidate
+            : candidate.querySelector('canvas')) as HTMLCanvasElement | null;
+        }
+      }
+      const rect = (canvas ?? waifu)?.getBoundingClientRect();
+      if (!rect) {
+        return;
+      }
+      const left = rect.left + rect.width * 0.32;
+      const top = rect.top + rect.height * 0.73;
+      mouth.style.left = `${Math.round(left)}px`;
+      mouth.style.top = `${Math.round(top)}px`;
+    };
+    const id = setInterval(tick, 500);
+    tick();
+    return () => clearInterval(id);
+  }, [avatarVideoUrl]);
 
   const setAiSpeaking = useCallback((value: boolean) => {
     isAiSpeakingRef.current = value;

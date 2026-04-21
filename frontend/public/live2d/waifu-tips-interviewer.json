@@ -1,0 +1,60 @@
+{
+  "mouseover": [],
+  "click": [],
+  "seasons": [],
+  "time": [],
+  "message": {
+    "default": [
+      "你好，我是本场面试官。准备好我们就开始。",
+      "回答请尽量结构化：背景—方案—结果。",
+      "我会针对关键细节追问，请直接给结论再解释原因。",
+      "说清楚取舍：为什么这样做？替代方案是什么？",
+      "可以用 STAR 法则：情境、任务、行动、结果。"
+    ],
+    "console": "打开控制台是为了排查问题吗？注意不要泄露密钥。",
+    "copy": "复制内容请确认不包含敏感信息。",
+    "visibilitychange": "回来了就继续，我们保持节奏。",
+    "changeSuccess": "已切换形象。",
+    "changeFail": "当前没有可用的其他形象。",
+    "photo": "准备好了吗？我们继续。",
+    "goodbye": "本场到此结束，祝你面试顺利。",
+    "welcome": "欢迎开始语音模拟面试。",
+    "referrer": "欢迎，来自 $1 的同学。",
+    "hoverBody": [
+      "请专注回答问题。",
+      "先别分心，我们继续。",
+      "如果需要暂停，可以点击暂停按钮。"
+    ],
+    "tapBody": [
+      [
+        "保持专注。",
+        "先把问题回答清楚。",
+        "准备好了就继续。"
+      ]
+    ]
+  },
+  "models": [
+    {
+      "name": "Potion-Maker/Pio",
+      "paths": [
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/Potion-Maker/Pio/index.json"
+      ],
+      "message": "面试官已就位"
+    },
+    {
+      "name": "Potion-Maker/Tia",
+      "paths": [
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/Potion-Maker/Tia/index.json"
+      ],
+      "message": "面试官已就位"
+    },
+    {
+      "name": "Hiyori",
+      "paths": [
+        "https://fastly.jsdelivr.net/gh/Live2D/CubismWebSamples/Samples/Resources/Hiyori/Hiyori.model3.json"
+      ],
+      "message": "面试官已就位"
+    }
+  ]
+}
+
