@@ -18,6 +18,11 @@ public record SessionListItemDTO(
     AsyncTaskStatus evaluateStatus,
     String evaluateError,
     Integer overallScore,
+    Integer technicalDepthScore,
+    Integer communicationScore,
+    Integer logicalThinkingScore,
+    Integer projectExperienceScore,
+    Integer adaptabilityScore,
     LocalDateTime createdAt,
     LocalDateTime completedAt
 ) {
@@ -32,6 +37,11 @@ public record SessionListItemDTO(
             e.getEvaluateStatus(),
             e.getEvaluateError(),
             e.getOverallScore(),
+            e.getTechnicalDepthScore(),
+            e.getCommunicationScore(),
+            e.getLogicalThinkingScore(),
+            e.getProjectExperienceScore(),
+            e.getAdaptabilityScore(),
             e.getCreatedAt(),
             e.getCompletedAt()
         );

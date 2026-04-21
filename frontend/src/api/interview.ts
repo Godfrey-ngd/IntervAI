@@ -18,6 +18,11 @@ export interface TextSessionMeta {
   evaluateStatus: string | null;
   evaluateError: string | null;
   overallScore: number | null;
+  technicalDepthScore?: number | null;
+  communicationScore?: number | null;
+  logicalThinkingScore?: number | null;
+  projectExperienceScore?: number | null;
+  adaptabilityScore?: number | null;
   createdAt: string;
   completedAt: string | null;
 }
