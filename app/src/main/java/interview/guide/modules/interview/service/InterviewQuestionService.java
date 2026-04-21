@@ -42,6 +42,7 @@ public class InterviewQuestionService {
     private final BeanOutputConverter<QuestionListDTO> outputConverter;
     private final StructuredOutputInvoker structuredOutputInvoker;
     private final InterviewSkillService skillService;
+    private final InterviewerPersonaService interviewerPersonaService;
     private final int followUpCount;
 
     private static final int MAX_FOLLOW_UP_COUNT = 2;
@@ -69,10 +70,12 @@ public class InterviewQuestionService {
     public InterviewQuestionService(
             StructuredOutputInvoker structuredOutputInvoker,
             InterviewSkillService skillService,
+            InterviewerPersonaService interviewerPersonaService,
             InterviewQuestionProperties properties,
             ResourceLoader resourceLoader) throws IOException {
         this.structuredOutputInvoker = structuredOutputInvoker;
         this.skillService = skillService;
+        this.interviewerPersonaService = interviewerPersonaService;
         this.skillSystemPromptTemplate = new PromptTemplate(
             resourceLoader.getResource(properties.getQuestionSystemPromptPath())
                 .getContentAsString(StandardCharsets.UTF_8)
@@ -93,7 +96,8 @@ public class InterviewQuestionService {
             int questionCount,
             List<HistoricalQuestion> historicalQuestions,
             List<CategoryDTO> customCategories,
-            String jdText) {
+            String jdText,
+            String personaType) {
 
         SkillDTO skill;
         if (InterviewSkillService.CUSTOM_SKILL_ID.equals(skillId)
@@ -125,7 +129,7 @@ public class InterviewQuestionService {
             variables.put("resumeSection", buildResumeSection(resumeText));
             variables.put("historicalSection", buildHistoricalSection(historicalQuestions));
             variables.put("referenceSection", skillService.buildReferenceSection(skill, allocation));
-            variables.put("personaSection", buildPersonaSection(skill.persona()));
+            variables.put("personaSection", interviewerPersonaService.buildPersonaSection(skill.persona(), personaType));
             variables.put("jdSection", buildJdSection(skill.sourceJd()));
 
             String systemPrompt = skillSystemPromptTemplate.render();
@@ -161,7 +165,17 @@ public class InterviewQuestionService {
     }
 
     public List<InterviewQuestionDTO> generateQuestions(ChatClient chatClient, String resumeText, int questionCount, List<HistoricalQuestion> historicalQuestions) {
-        return generateQuestionsBySkill(chatClient, InterviewDefaults.SKILL_ID, InterviewDefaults.DIFFICULTY, resumeText, questionCount, historicalQuestions, null, null);
+        return generateQuestionsBySkill(
+            chatClient,
+            InterviewDefaults.SKILL_ID,
+            InterviewDefaults.DIFFICULTY,
+            resumeText,
+            questionCount,
+            historicalQuestions,
+            null,
+            null,
+            null
+        );
     }
 
     public List<InterviewQuestionDTO> generateQuestions(ChatClient chatClient, String resumeText, int questionCount) {
@@ -202,13 +216,6 @@ public class InterviewQuestionService {
             sb.append('\n');
         }
         return sb.toString();
-    }
-
-    private String buildPersonaSection(String persona) {
-        if (persona == null || persona.isBlank()) {
-            return "使用专业、直接、可执行的技术面试官风格。";
-        }
-        return persona;
     }
 
     private String buildJdSection(String sourceJd) {

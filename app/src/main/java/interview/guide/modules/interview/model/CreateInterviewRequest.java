@@ -28,6 +28,8 @@ public record CreateInterviewRequest(
 
     String difficulty,      // 难度级别: junior / mid / senior
 
+    String personaType,     // 面试官人格: STRICT / FRIENDLY（可选）
+
     List<CategoryDTO> customCategories,   // 自定义面试的分类（JD 解析结果）
 
     String jdText                          // JD 原文（自定义面试时作为出题依据）

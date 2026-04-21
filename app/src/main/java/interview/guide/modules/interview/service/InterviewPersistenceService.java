@@ -49,7 +49,8 @@ public class InterviewPersistenceService {
                                               List<InterviewQuestionDTO> questions,
                                               String llmProvider,
                                               String skillId,
-                                              String difficulty) {
+                                              String difficulty,
+                                              String personaType) {
         try {
             InterviewSessionEntity session = new InterviewSessionEntity();
             session.setSessionId(sessionId);
@@ -60,6 +61,7 @@ public class InterviewPersistenceService {
             session.setLlmProvider(llmProvider != null ? llmProvider : InterviewDefaults.LLM_PROVIDER);
             session.setSkillId(skillId != null ? skillId : InterviewDefaults.SKILL_ID);
             session.setDifficulty(difficulty != null ? difficulty : InterviewDefaults.DIFFICULTY);
+            session.setPersonaType(personaType != null ? personaType : "STRICT");
 
             // 简历可选：有 resumeId 则关联简历
             if (resumeId != null) {
@@ -124,6 +126,24 @@ public class InterviewPersistenceService {
             session.setCurrentQuestionIndex(index);
             session.setStatus(InterviewSessionEntity.SessionStatus.IN_PROGRESS);
             sessionRepository.save(session);
+        }
+    }
+
+    /**
+     * 更新会话题目JSON（用于动态追问替换）。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateQuestionsJson(String sessionId, List<InterviewQuestionDTO> questions) {
+        Optional<InterviewSessionEntity> sessionOpt = sessionRepository.findBySessionId(sessionId);
+        if (sessionOpt.isEmpty()) {
+            return;
+        }
+        try {
+            InterviewSessionEntity session = sessionOpt.get();
+            session.setQuestionsJson(objectMapper.writeValueAsString(questions));
+            sessionRepository.save(session);
+        } catch (JacksonException e) {
+            log.warn("更新会话题目JSON失败: sessionId={}, error={}", sessionId, e.getMessage());
         }
     }
     

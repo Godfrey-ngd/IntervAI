@@ -46,6 +46,8 @@ public class InterviewSessionService {
     private final ObjectMapper objectMapper;
     private final EvaluateStreamProducer evaluateStreamProducer;
     private final LlmProviderRegistry llmProviderRegistry;
+    private final InterviewerPersonaService interviewerPersonaService;
+    private final FollowUpGenerationService followUpGenerationService;
 
     /**
      * 创建新的面试会话
@@ -66,9 +68,10 @@ public class InterviewSessionService {
         String sessionId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
         String skillId = request.skillId() != null ? request.skillId() : InterviewDefaults.SKILL_ID;
         String difficulty = request.difficulty() != null ? request.difficulty() : InterviewDefaults.DIFFICULTY;
+        String personaType = interviewerPersonaService.normalizePersonaType(request.personaType());
 
-        log.info("创建新面试会话: {}, skill: {}, difficulty: {}, questionCount: {}, resumeId: {}",
-            sessionId, skillId, difficulty, request.questionCount(), request.resumeId());
+        log.info("创建新面试会话: {}, skill: {}, difficulty: {}, personaType: {}, questionCount: {}, resumeId: {}",
+            sessionId, skillId, difficulty, personaType, request.questionCount(), request.resumeId());
 
         // 获取历史问题（通用模式按 skillId 查询，有简历时按 resumeId + skillId 精确匹配）
         List<HistoricalQuestion> historicalQuestions =
@@ -86,7 +89,8 @@ public class InterviewSessionService {
             request.questionCount(),
             historicalQuestions,
             request.customCategories(),
-            request.jdText()
+            request.jdText(),
+            personaType
         );
 
         // 保存到 Redis 缓存
@@ -102,7 +106,7 @@ public class InterviewSessionService {
         // 保存到数据库
         try {
             persistenceService.saveSession(sessionId, request.resumeId(),
-                questions.size(), questions, request.llmProvider(), skillId, difficulty);
+                questions.size(), questions, request.llmProvider(), skillId, difficulty, personaType);
         } catch (Exception e) {
             log.warn("保存面试会话到数据库失败: {}", e.getMessage());
         }
@@ -306,6 +310,11 @@ public class InterviewSessionService {
         InterviewQuestionDTO answeredQuestion = question.withAnswer(request.answer());
         questions.set(index, answeredQuestion);
 
+        boolean dynamicFollowUpUpdated = false;
+        if (!question.isFollowUp()) {
+            dynamicFollowUpUpdated = tryReplaceDynamicFollowUp(request.sessionId(), questions, index, request.answer());
+        }
+
         // 移动到下一题
         int newIndex = index + 1;
 
@@ -329,6 +338,9 @@ public class InterviewSessionService {
                 question.question(), question.category(),
                 request.answer(), 0, null  // 分数在报告生成时更新
             );
+            if (dynamicFollowUpUpdated) {
+                persistenceService.updateQuestionsJson(request.sessionId(), questions);
+            }
             persistenceService.updateCurrentQuestionIndex(request.sessionId(), newIndex);
             persistenceService.updateSessionStatus(request.sessionId(),
                 newStatus == SessionStatus.COMPLETED
@@ -354,6 +366,69 @@ public class InterviewSessionService {
             newIndex,
             questions.size()
         );
+    }
+
+    private boolean tryReplaceDynamicFollowUp(String sessionId,
+                                              List<InterviewQuestionDTO> questions,
+                                              int mainQuestionIndex,
+                                              String userAnswer) {
+        int followUpIndex = findPendingFollowUpIndex(questions, mainQuestionIndex);
+        if (followUpIndex < 0) {
+            return false;
+        }
+
+        InterviewQuestionDTO mainQuestion = questions.get(mainQuestionIndex);
+        InterviewQuestionDTO targetFollowUp = questions.get(followUpIndex);
+
+        try {
+            Optional<InterviewSessionEntity> sessionEntityOpt = persistenceService.findBySessionId(sessionId);
+            String skillId = sessionEntityOpt.map(InterviewSessionEntity::getSkillId).orElse(InterviewDefaults.SKILL_ID);
+            String personaType = sessionEntityOpt.map(InterviewSessionEntity::getPersonaType).orElse("STRICT");
+            String llmProvider = sessionEntityOpt.map(InterviewSessionEntity::getLlmProvider).orElse(InterviewDefaults.LLM_PROVIDER);
+
+            ChatClient chatClient = llmProviderRegistry.getChatClientOrDefault(llmProvider);
+            String dynamicFollowUp = followUpGenerationService.generateFollowUp(
+                chatClient,
+                skillId,
+                personaType,
+                mainQuestion,
+                userAnswer,
+                questions,
+                mainQuestionIndex
+            );
+
+            InterviewQuestionDTO replaced = InterviewQuestionDTO.create(
+                targetFollowUp.questionIndex(),
+                dynamicFollowUp,
+                targetFollowUp.type(),
+                targetFollowUp.category(),
+                targetFollowUp.topicSummary(),
+                true,
+                mainQuestionIndex
+            );
+            questions.set(followUpIndex, replaced);
+            log.info("会话 {} 动态追问已替换: mainQuestionIndex={}, followUpIndex={}",
+                sessionId, mainQuestionIndex, followUpIndex);
+            return true;
+        } catch (Exception e) {
+            log.warn("会话 {} 动态追问替换失败，保留原追问: {}", sessionId, e.getMessage());
+            return false;
+        }
+    }
+
+    private int findPendingFollowUpIndex(List<InterviewQuestionDTO> questions, int mainQuestionIndex) {
+        for (int i = mainQuestionIndex + 1; i < questions.size(); i++) {
+            InterviewQuestionDTO candidate = questions.get(i);
+            if (!candidate.isFollowUp()) {
+                break;
+            }
+            if (candidate.parentQuestionIndex() != null
+                && candidate.parentQuestionIndex() == mainQuestionIndex
+                && (candidate.userAnswer() == null || candidate.userAnswer().isBlank())) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**

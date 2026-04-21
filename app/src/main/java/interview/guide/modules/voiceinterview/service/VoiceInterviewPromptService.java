@@ -1,6 +1,7 @@
 package interview.guide.modules.voiceinterview.service;
 
 import interview.guide.modules.interview.skill.InterviewSkillService;
+import interview.guide.modules.interview.service.InterviewerPersonaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,13 @@ public class VoiceInterviewPromptService {
             """;
 
     private final InterviewSkillService skillService;
+    private final InterviewerPersonaService interviewerPersonaService;
 
-    public String generateSystemPromptWithContext(String skillId, String resumeText) {
-        String basePrompt = loadPersona(skillId);
+    public String generateSystemPromptWithContext(String skillId, String resumeText, String personaType) {
+        String basePrompt = loadSkillPersona(skillId);
+        String personaPrompt = interviewerPersonaService.buildPersonaSection(basePrompt, personaType);
 
-        StringBuilder prompt = new StringBuilder(basePrompt)
+        StringBuilder prompt = new StringBuilder(personaPrompt)
             .append("\n\n")
             .append(VOICE_RESPONSE_CONSTRAINTS);
 
@@ -38,7 +41,7 @@ public class VoiceInterviewPromptService {
         return prompt.toString();
     }
 
-    private String loadPersona(String skillId) {
+    private String loadSkillPersona(String skillId) {
         try {
             InterviewSkillService.SkillDTO skill = skillService.getSkill(skillId);
             String persona = skill.persona();

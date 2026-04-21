@@ -4,6 +4,7 @@ import interview.guide.common.constant.CommonConstants.InterviewDefaults;
 import interview.guide.common.exception.BusinessException;
 import interview.guide.common.exception.ErrorCode;
 import interview.guide.common.model.AsyncTaskStatus;
+import interview.guide.modules.interview.service.InterviewerPersonaService;
 import interview.guide.modules.voiceinterview.config.VoiceInterviewProperties;
 import interview.guide.modules.voiceinterview.dto.CreateSessionRequest;
 import interview.guide.modules.voiceinterview.dto.VoiceInterviewMessageDTO;
@@ -48,6 +49,7 @@ public class VoiceInterviewService {
     private final RedissonClient redissonClient;
     private final VoiceInterviewProperties properties;
     private final VoiceEvaluateStreamProducer voiceEvaluateStreamProducer;
+    private final InterviewerPersonaService interviewerPersonaService;
 
     private static final String SESSION_CACHE_KEY_PREFIX = "voice:interview:session:";
     private static final int CACHE_TTL_HOURS = 1;
@@ -66,12 +68,14 @@ public class VoiceInterviewService {
         String effectiveLlmProvider = (request.getLlmProvider() != null && !request.getLlmProvider().isBlank())
             ? request.getLlmProvider()
             : properties.getLlmProvider();
+        String effectivePersonaType = interviewerPersonaService.normalizePersonaType(request.getPersonaType());
 
         VoiceInterviewSessionEntity session = VoiceInterviewSessionEntity.builder()
                 .userId(DEFAULT_USER_ID)
                 .roleType(effectiveSkillId)
                 .skillId(effectiveSkillId)
                 .difficulty(request.getDifficulty() != null ? request.getDifficulty() : InterviewDefaults.DIFFICULTY)
+                .personaType(effectivePersonaType)
                 .customJdText(request.getCustomJdText())
                 .resumeId(request.getResumeId())
                 .introEnabled(request.getIntroEnabled())
@@ -86,8 +90,8 @@ public class VoiceInterviewService {
         VoiceInterviewSessionEntity saved = sessionRepository.save(session);
         cacheSession(saved);
 
-        log.info("Created voice interview session: {} with template: {}, phase: {}",
-                saved.getId(), effectiveSkillId, saved.getCurrentPhase());
+        log.info("Created voice interview session: {} with template: {}, personaType: {}, phase: {}",
+            saved.getId(), effectiveSkillId, effectivePersonaType, saved.getCurrentPhase());
 
         return buildSessionResponse(saved);
     }
