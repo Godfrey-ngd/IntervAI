@@ -1,6 +1,9 @@
 package interview.guide.modules.voiceinterview.service;
 
 import interview.guide.common.exception.BusinessException;
+import interview.guide.modules.interview.service.InterviewFlowService;
+import interview.guide.modules.interview.service.InterviewerPersonaService;
+import interview.guide.modules.voiceinterview.config.VoiceInterviewProperties;
 import interview.guide.modules.voiceinterview.dto.SessionMetaDTO;
 import interview.guide.modules.voiceinterview.dto.SessionResponseDTO;
 import interview.guide.modules.voiceinterview.listener.VoiceEvaluateStreamProducer;
@@ -43,6 +46,12 @@ class VoiceInterviewServicePauseTest {
     @Mock
     private VoiceEvaluateStreamProducer voiceEvaluateStreamProducer;
 
+    @Mock
+    private InterviewerPersonaService interviewerPersonaService;
+
+    @Mock
+    private InterviewFlowService interviewFlowService;
+
     private VoiceInterviewService service;
 
     @BeforeEach
@@ -52,8 +61,10 @@ class VoiceInterviewServicePauseTest {
             sessionRepository,
             messageRepository,
             redissonClient,
-            null,  // properties
-            voiceEvaluateStreamProducer
+            new VoiceInterviewProperties(),
+            voiceEvaluateStreamProducer,
+            interviewerPersonaService,
+            interviewFlowService
         );
     }
 

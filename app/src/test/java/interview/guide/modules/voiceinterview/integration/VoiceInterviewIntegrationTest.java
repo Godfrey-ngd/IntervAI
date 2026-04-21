@@ -57,6 +57,7 @@ class VoiceInterviewIntegrationTest {
             // Step 1: Create session
             CreateSessionRequest createRequest = CreateSessionRequest.builder()
                 .roleType("ali-p8")
+                .skillId("ali-p8")
                 .introEnabled(true)
                 .techEnabled(true)
                 .projectEnabled(true)
@@ -104,6 +105,7 @@ class VoiceInterviewIntegrationTest {
             // Create session with INTRO and TECH phases
             CreateSessionRequest request = CreateSessionRequest.builder()
                 .roleType("byteance-algo")
+                .skillId("byteance-algo")
                 .introEnabled(true)
                 .techEnabled(true)
                 .projectEnabled(false)
@@ -136,6 +138,7 @@ class VoiceInterviewIntegrationTest {
         void testSessionPersistence() {
             CreateSessionRequest request = CreateSessionRequest.builder()
                 .roleType("tencent-backend")
+                .skillId("tencent-backend")
                 .introEnabled(true)
                 .plannedDuration(25)
                 .build();
@@ -160,6 +163,7 @@ class VoiceInterviewIntegrationTest {
         void testMultiPhaseSession() {
             CreateSessionRequest request = CreateSessionRequest.builder()
                 .roleType("ali-p8")
+                .skillId("ali-p8")
                 .introEnabled(true)
                 .techEnabled(true)
                 .projectEnabled(true)
@@ -218,6 +222,7 @@ class VoiceInterviewIntegrationTest {
             // Create session with minimal configuration
             CreateSessionRequest request = CreateSessionRequest.builder()
                 .roleType("ali-p8")
+                .skillId("ali-p8")
                 .build();
 
             SessionResponseDTO sessionResponse = voiceInterviewService.createSession(request);
@@ -234,6 +239,7 @@ class VoiceInterviewIntegrationTest {
             for (String roleType : roleTypes) {
                 CreateSessionRequest request = CreateSessionRequest.builder()
                     .roleType(roleType)
+                    .skillId(roleType)
                     .plannedDuration(30)
                     .build();
 
