@@ -114,12 +114,25 @@ export interface WebSocketAudioChunkMessage {
   isLast: boolean;
 }
 
+export interface WebSocketErrorMessage {
+  type: 'error';
+  message: string;
+}
+
+export interface WebSocketAvatarVideoMessage {
+  type: 'avatar_video';
+  url: string;
+  clipId?: string;
+}
+
 export type WebSocketMessage =
   | WebSocketAudioMessage
   | WebSocketSubtitleMessage
   | WebSocketAudioResponseMessage
   | WebSocketTextMessage
-  | WebSocketAudioChunkMessage;
+  | WebSocketAudioChunkMessage
+  | WebSocketErrorMessage
+  | WebSocketAvatarVideoMessage;
 
 // WebSocket 事件处理器
 export interface WebSocketEventHandlers {
@@ -127,6 +140,8 @@ export interface WebSocketEventHandlers {
   onSubtitle?: (text: string, isFinal: boolean) => void;
   onAudioResponse?: (audioData: string, text: string) => void;
   onAudioChunk?: (data: string, index: number, isLast: boolean) => void;
+  onAvatarVideo?: (url: string, clipId?: string) => void;
+  onServerError?: (message: string) => void;
   onOpen?: () => void;
   onClose?: (event: CloseEvent) => void;
   onError?: (error: Event) => void;
@@ -270,6 +285,18 @@ export class VoiceInterviewWebSocket {
               if ('index' in message) {
                 const chunkMsg = message as WebSocketAudioChunkMessage;
                 this.handlers.onAudioChunk?.(chunkMsg.data, chunkMsg.index, chunkMsg.isLast);
+              }
+              break;
+            case 'avatar_video':
+              if ('url' in message) {
+                const videoMsg = message as WebSocketAvatarVideoMessage;
+                this.handlers.onAvatarVideo?.(videoMsg.url, videoMsg.clipId);
+              }
+              break;
+            case 'error':
+              if ('message' in message) {
+                const errMsg = message as WebSocketErrorMessage;
+                this.handlers.onServerError?.(errMsg.message);
               }
               break;
             case 'text':

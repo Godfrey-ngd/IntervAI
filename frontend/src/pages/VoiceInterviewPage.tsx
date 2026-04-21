@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Clock, PhoneOff, AlertCircle, Bot, Mic, ArrowLeft, SendHorizonal } from 'lucide-react';
+import { Clock, PhoneOff, AlertCircle, Mic, ArrowLeft, SendHorizonal, Bot } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AudioRecorder from '../components/AudioRecorder';
 import InterviewPageHeader from '../components/InterviewPageHeader';
@@ -45,6 +45,7 @@ export default function VoiceInterviewPage() {
   const [messages, setMessages] = useState<{ role: 'user' | 'ai'; text: string; id: string }[]>([]);
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
   const [aiAudio, setAiAudio] = useState('');
+  const [avatarVideoUrl, setAvatarVideoUrl] = useState('');
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [templateName, setTemplateName] = useState<string>('');
@@ -352,6 +353,16 @@ export default function VoiceInterviewPage() {
     onAudioChunk: (data: string, index: number, isLast: boolean) => {
       handleAudioChunk(data, index, isLast);
     },
+    onAvatarVideo: (url: string) => {
+      if (url && url.trim()) {
+        setAvatarVideoUrl(url.trim());
+      }
+    },
+    onServerError: (message: string) => {
+      if (message && message.trim()) {
+        setError(message.trim());
+      }
+    },
   }), [clearPendingAiTextCommit, commitAiMessage, handleAudioChunk, setAiSpeaking]);
 
   const connectWithHandlers = useCallback((sessionId: number, wsUrl: string) => {
@@ -595,17 +606,32 @@ export default function VoiceInterviewPage() {
               </div>
 
               <div className="flex flex-col items-center justify-center py-6">
-                <motion.div
-                  animate={isAiSpeaking ? { scale: [1, 1.05, 1] } : {}}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className={`w-32 h-32 rounded-full border-4 flex items-center justify-center mb-6 transition-colors
-                    ${isAiSpeaking
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                      : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60'
-                    }`}
-                >
-                  <Bot className={`w-14 h-14 ${isAiSpeaking ? 'text-primary-500' : 'text-slate-400 dark:text-slate-500'}`} />
-                </motion.div>
+                <div className="flex items-center justify-center mb-6">
+                  {avatarVideoUrl ? (
+                    <div className="w-48 h-48 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60">
+                      <video
+                        src={avatarVideoUrl}
+                        autoPlay
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                        onError={() => setAvatarVideoUrl('')}
+                      />
+                    </div>
+                  ) : (
+                    <motion.div
+                      animate={isAiSpeaking ? { scale: [1, 1.05, 1] } : {}}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                      className={`w-32 h-32 rounded-full border-4 flex items-center justify-center transition-colors
+                        ${isAiSpeaking
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                          : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60'
+                        }`}
+                    >
+                      <Bot className={`w-14 h-14 ${isAiSpeaking ? 'text-primary-500' : 'text-slate-400 dark:text-slate-500'}`} />
+                    </motion.div>
+                  )}
+                </div>
 
                 <div className="w-full max-w-2xl min-h-[130px] rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 px-6 py-5 text-center flex items-center justify-center">
                   <AnimatePresence mode="wait">

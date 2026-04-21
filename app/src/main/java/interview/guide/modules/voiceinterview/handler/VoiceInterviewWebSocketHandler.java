@@ -11,6 +11,7 @@ import interview.guide.modules.voiceinterview.config.VoiceInterviewProperties;
 import interview.guide.modules.voiceinterview.service.QwenAsrService;
 import interview.guide.modules.voiceinterview.service.QwenTtsService;
 import interview.guide.modules.voiceinterview.service.DashscopeLlmService;
+import interview.guide.modules.voiceinterview.service.DidClipClient;
 import interview.guide.modules.voiceinterview.service.VoiceInterviewService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +60,7 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
     private final QwenAsrService sttService;
     private final QwenTtsService ttsService;
     private final DashscopeLlmService llmService;
+    private final DidClipClient didClipClient;
     private final VoiceInterviewService interviewService;
     private final VoiceInterviewProperties voiceInterviewProperties;
     private final ObjectProvider<MeterRegistry> meterRegistryProvider;
@@ -655,6 +657,7 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
                             }
                         }
                         recordTimerSinceNanos("app.voice.interview.tts.duration", ttsStartNanos, "status", "success");
+                        triggerDidClipAsync(sessionId, session, aiReply);
                     } else {
                         // 合并模式：收集所有 PCM 后合并为一个完整音频
                         List<byte[]> pcmChunks = new ArrayList<>();
@@ -688,6 +691,7 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
                             log.info("[Session: {}] Sending merged audio - {} sentences, WAV size: {} bytes",
                                 sessionId, pcmChunks.size(), wavAudio.length);
                             sendAudio(session, wavAudio, aiReply);
+                            triggerDidClipAsync(sessionId, session, aiReply);
                         } else {
                             log.error("[Session: {}] All TTS calls returned empty audio", sessionId);
                             incrementCounter("app.voice.interview.tts.empty_audio", "status", "empty");
@@ -725,6 +729,7 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
                 } else {
                     byte[] wavAudio = convertPcmToWav(aiAudio);
                     sendAudio(session, wavAudio, aiReply);
+                    triggerDidClipAsync(sessionId, session, aiReply);
                 }
             }
 
@@ -815,6 +820,62 @@ public class VoiceInterviewWebSocketHandler extends TextWebSocketHandler impleme
 
     private void sendTextMessage(WebSocketSession session, String text) {
         sendMessage(session, toJson(Map.of("type", "text", "content", text)));
+    }
+
+    private void triggerDidClipAsync(String sessionId, WebSocketSession session, String text) {
+        VoiceInterviewProperties.DidConfig did = voiceInterviewProperties.getDid();
+        if (did == null || !did.isEnabled()) {
+            log.debug("[D-ID] Disabled, skip clip generation. sessionId={}", sessionId);
+            return;
+        }
+        String presenterId = did.getPresenterId();
+        if (presenterId == null || presenterId.isBlank()) {
+            log.warn("[D-ID] presenterId is blank, skip clip generation. sessionId={}", sessionId);
+            return;
+        }
+        String input = text == null ? "" : text.trim();
+        if (input.isEmpty()) {
+            return;
+        }
+
+        voicePipelineExecutor.execute(() -> {
+            try {
+                DidClipClient.CreateClipResponse created = didClipClient.createClipWithText(presenterId, input);
+                if (created == null || created.id() == null || created.id().isBlank()) {
+                    log.warn("[D-ID] Create clip returned empty id. sessionId={}", sessionId);
+                    return;
+                }
+                log.info("[D-ID] Clip created. sessionId={}, clipId={}, status={}",
+                    sessionId, created.id(), created.status());
+                long deadline = System.currentTimeMillis() + Math.max(5_000, did.getMaxWaitMs());
+                long interval = Math.max(400, did.getPollIntervalMs());
+                while (System.currentTimeMillis() < deadline) {
+                    if (session == null || !session.isOpen()) {
+                        return;
+                    }
+                    DidClipClient.ClipStatusResponse status = didClipClient.getClipStatus(created.id());
+                    if (status != null && "done".equalsIgnoreCase(status.status())
+                        && status.result_url() != null && !status.result_url().isBlank()) {
+                        log.info("[D-ID] Clip done. sessionId={}, clipId={}", sessionId, status.id());
+                        sendMessage(session, toJson(Map.of(
+                            "type", "avatar_video",
+                            "url", status.result_url(),
+                            "clipId", status.id()
+                        )));
+                        return;
+                    }
+                    Thread.sleep(interval);
+                }
+                log.warn("[D-ID] Clip polling timeout. sessionId={}, clipId={}", sessionId, created.id());
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+            } catch (Exception ignored) {
+                log.warn("[D-ID] Clip generation failed. sessionId={}", sessionId);
+                if (session != null && session.isOpen()) {
+                    sendError(session, "虚拟考官视频生成失败，请检查 D-ID 配置或额度");
+                }
+            }
+        });
     }
 
     private void sendError(WebSocketSession session, String error) {

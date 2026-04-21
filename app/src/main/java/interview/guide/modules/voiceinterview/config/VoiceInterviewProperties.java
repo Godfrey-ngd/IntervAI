@@ -24,6 +24,7 @@ public class VoiceInterviewProperties {
     private AudioConfig audio = new AudioConfig();
     private QwenConfig qwen = new QwenConfig();
     private OpeningConfig opening = new OpeningConfig();
+    private DidConfig did = new DidConfig();
 
     /**
      * 语音面试单轮面试官回复最大字符数（超出会截断到句子边界）。
@@ -155,5 +156,15 @@ public class VoiceInterviewProperties {
             "你好，我是本场面试官。先做一道算法与数据结构热身题：请你从“哈希表/堆/栈/队列/树/图”里选两个，结合一道你熟悉的题，口述“为什么选这个结构、核心步骤、时间复杂度、空间复杂度、边界条件与反例”。本场不需要写代码，重点看你的思路和取舍。";
         private String backendQuestion =
             "你好，我是本场面试官。第一个问题：请用 1 分钟介绍一个你深度参与的项目，按三点回答：业务目标、你负责的核心模块、核心技术栈。说完我会立刻追问一个关键技术决策。";
+    }
+
+    @Data
+    public static class DidConfig {
+        private boolean enabled = false;
+        private String baseUrl = "https://api.d-id.com";
+        private String apiKey;
+        private String presenterId;
+        private long pollIntervalMs = 1200;
+        private long maxWaitMs = 90000;
     }
 }
