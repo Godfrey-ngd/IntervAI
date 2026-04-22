@@ -8,6 +8,7 @@ interface InterviewMessageBubbleProps {
   role: InterviewMessageRole;
   text: string;
   category?: string;
+  isFollowUp?: boolean;
   highlight?: boolean;
   italic?: boolean;
   suffix?: ReactNode;
@@ -17,6 +18,7 @@ export default function InterviewMessageBubble({
   role,
   text,
   category,
+  isFollowUp = false,
   highlight = false,
   italic = false,
   suffix,
@@ -37,6 +39,11 @@ export default function InterviewMessageBubble({
             {category && (
               <span className="px-2 py-0.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs rounded-full">
                 {category}
+              </span>
+            )}
+            {isFollowUp && (
+              <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 text-xs rounded-full">
+                动态追问
               </span>
             )}
           </div>

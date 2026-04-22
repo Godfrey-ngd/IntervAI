@@ -1,6 +1,7 @@
 package interview.guide.modules.voiceinterview.service;
 
 import interview.guide.modules.interview.skill.InterviewSkillService;
+import interview.guide.modules.interview.service.InterviewerPersonaService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,9 @@ class VoiceInterviewPromptServiceTest {
   @Mock
   private InterviewSkillService skillService;
 
+  @Mock
+  private InterviewerPersonaService interviewerPersonaService;
+
   @InjectMocks
   private VoiceInterviewPromptService promptService;
 
@@ -38,8 +42,10 @@ class VoiceInterviewPromptServiceTest {
       null
     );
     when(skillService.getSkill("java-backend")).thenReturn(skill);
+    when(interviewerPersonaService.buildPersonaSection("你是资深Java后端面试官", "STRICT"))
+      .thenReturn("你是资深Java后端面试官\n\n【人格风格：STRICT】");
 
-    String prompt = promptService.generateSystemPromptWithContext("java-backend", null);
+    String prompt = promptService.generateSystemPromptWithContext("java-backend", null, "STRICT");
 
     assertNotNull(prompt);
     assertTrue(prompt.contains("你是资深Java后端面试官"));
@@ -51,8 +57,10 @@ class VoiceInterviewPromptServiceTest {
   void generateSystemPromptWithContext_whenSkillThrows_shouldFallbackToDefault() {
     when(skillService.getSkill("unknown-skill"))
       .thenThrow(new RuntimeException("not found"));
+    when(interviewerPersonaService.buildPersonaSection("你是一位专业的面试官，请根据候选人的回答进行深入提问。", "STRICT"))
+      .thenReturn("你是一位专业的面试官，请根据候选人的回答进行深入提问。\n\n【人格风格：STRICT】");
 
-    String prompt = promptService.generateSystemPromptWithContext("unknown-skill", null);
+    String prompt = promptService.generateSystemPromptWithContext("unknown-skill", null, "STRICT");
 
     assertNotNull(prompt);
     assertTrue(prompt.contains("你是一位专业的面试官"));
@@ -64,8 +72,10 @@ class VoiceInterviewPromptServiceTest {
   void generateSystemPromptWithContext_withResume_shouldContainResumeSection() {
     when(skillService.getSkill("java-backend"))
       .thenThrow(new RuntimeException("fallback"));
+    when(interviewerPersonaService.buildPersonaSection("你是一位专业的面试官，请根据候选人的回答进行深入提问。", "FRIENDLY"))
+      .thenReturn("你是一位专业的面试官，请根据候选人的回答进行深入提问。\n\n【人格风格：FRIENDLY】");
 
-    String prompt = promptService.generateSystemPromptWithContext("java-backend", "候选人有三年后端经验");
+    String prompt = promptService.generateSystemPromptWithContext("java-backend", "候选人有三年后端经验", "FRIENDLY");
 
     assertNotNull(prompt);
     assertTrue(prompt.contains("候选人简历内容"));

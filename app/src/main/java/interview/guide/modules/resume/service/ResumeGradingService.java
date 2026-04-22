@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +37,14 @@ public class ResumeGradingService {
     private final StructuredOutputInvoker structuredOutputInvoker;
     
     // 中间DTO用于接收AI响应
+    /**
+     * strengthsText：由模型输出单字段，用分号分隔要点，避免 JSON 数组第四项等位置出现未转义引号、嵌套结构导致解析失败。
+     */
     private record ResumeAnalysisResponseDTO(
         int overallScore,
         ScoreDetailDTO scoreDetail,
         String summary,
-        List<String> strengths,
+        String strengthsText,
         List<SuggestionDTO> suggestions
     ) {}
     
@@ -149,10 +153,25 @@ public class ResumeGradingService {
             dto.overallScore(),
             scoreDetail,
             dto.summary(),
-            dto.strengths(),
+            splitStrengths(dto.strengthsText()),
             suggestions,
             originalText
         );
+    }
+
+    private static List<String> splitStrengths(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return List.of();
+        }
+        String[] parts = raw.split("[；;\n\r]+");
+        List<String> out = new ArrayList<>();
+        for (String p : parts) {
+            String t = p.trim();
+            if (!t.isEmpty()) {
+                out.add(t);
+            }
+        }
+        return out.isEmpty() ? List.of(raw.trim()) : List.copyOf(out);
     }
     
     /**

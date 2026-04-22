@@ -36,6 +36,10 @@ public class VoiceInterviewSessionEntity {
     @Builder.Default
     private String difficulty = "mid";
 
+    @Column(name = "persona_type", length = 16)
+    @Builder.Default
+    private String personaType = "STRICT";
+
     @Column(name = "custom_jd_text", columnDefinition = "TEXT")
     private String customJdText;
 

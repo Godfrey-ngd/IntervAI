@@ -35,6 +35,10 @@ public class InterviewSessionEntity {
     @Column(length = 16)
     private String difficulty = "mid";
 
+    // 面试官人格 (STRICT / FRIENDLY)
+    @Column(length = 16)
+    private String personaType = "STRICT";
+
     // 简历ID（直接映射FK列，避免LAZY加载触发额外查询）
     @Column(name = "resume_id", insertable = false, updatable = false)
     private Long resumeId;
@@ -324,6 +328,14 @@ public class InterviewSessionEntity {
 
     public void setDifficulty(String difficulty) {
         this.difficulty = difficulty;
+    }
+
+    public String getPersonaType() {
+        return personaType;
+    }
+
+    public void setPersonaType(String personaType) {
+        this.personaType = personaType;
     }
 
     public void addAnswer(InterviewAnswerEntity answer) {

@@ -22,6 +22,7 @@ export interface InterviewConfigState {
   mode: InterviewMode;
   skillId: string;
   difficulty: Difficulty;
+  personaType: 'STRICT' | 'FRIENDLY';
   skills: SkillDTO[];
   loadingSkills: boolean;
   showMore: boolean;
@@ -49,6 +50,7 @@ export function useInterviewConfig(options?: {
   const [mode, setMode] = useState<InterviewMode>(defaultMode);
   const [skillId, setSkillId] = useState(DEFAULT_SKILL_ID);
   const [difficulty, setDifficulty] = useState<Difficulty>('mid');
+  const [personaType, setPersonaType] = useState<'STRICT' | 'FRIENDLY'>('STRICT');
   const [skills, setSkills] = useState<SkillDTO[]>([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [showMore, setShowMore] = useState(false);
@@ -125,6 +127,7 @@ export function useInterviewConfig(options?: {
     mode, setMode,
     skillId, setSkillId,
     difficulty, setDifficulty,
+    personaType, setPersonaType,
     skills, setSkills,
     loadingSkills,
     showMore, setShowMore,

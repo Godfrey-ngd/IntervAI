@@ -17,4 +17,8 @@ public class StorageConfigProperties {
     private String secretKey;
     private String bucket;
     private String region = "us-east-1";
+    /**
+     * 启动时若桶不存在则自动创建（本地 RustFS/MinIO 友好）。云上若由 IaC 管桶可设为 false。
+     */
+    private boolean autoCreateBucket = true;
 }

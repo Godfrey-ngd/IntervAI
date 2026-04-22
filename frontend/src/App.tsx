@@ -88,6 +88,7 @@ interface InterviewEntryState {
   interviewConfig?: {
     skillId?: string;
     difficulty?: Difficulty;
+    personaType?: 'STRICT' | 'FRIENDLY';
     questionCount?: number;
     llmProvider?: string;
     customCategories?: CategoryDTO[];

@@ -20,6 +20,7 @@ export default function VoiceInterviewPage() {
     voiceConfig?: {
       skillId: string;
       difficulty?: string;
+      personaType?: 'STRICT' | 'FRIENDLY';
       techEnabled: boolean;
       projectEnabled: boolean;
       hrEnabled: boolean;
@@ -430,7 +431,10 @@ export default function VoiceInterviewPage() {
       INTRO: '自我介绍',
       TECH: '技术问题',
       PROJECT: '项目深挖',
-      HR: 'HR问题',
+      BEHAVIOR: '行为面试',
+      HR: '行为面试',
+      QA: '反问',
+      COMPLETED: '已完成',
     };
     return phaseMap[phase] || phase;
   };
@@ -554,7 +558,8 @@ export default function VoiceInterviewPage() {
       const session = await voiceInterviewApi.createSession({
         skillId: config.skillId,
         difficulty: config.difficulty,
-        introEnabled: false,
+        personaType: config.personaType ?? 'STRICT',
+        introEnabled: true,
         techEnabled: config.techEnabled,
         projectEnabled: config.projectEnabled,
         hrEnabled: config.hrEnabled,

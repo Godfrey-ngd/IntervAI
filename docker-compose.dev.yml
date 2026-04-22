@@ -54,8 +54,8 @@ services:
       timeout: 3s
       retries: 5
 
-# 首次启动后，浏览器访问 http://localhost:9001
-# 使用 ${RUSTFS_ACCESS_KEY} / ${RUSTFS_SECRET_KEY} 登录，手动创建名为 interview-guide 的 bucket
+# 首次启动后，控制台见 http://localhost:9001（可选）。
+# 后端启动时会自动创建 APP_STORAGE_BUCKET（默认 interview-guide），无需再手工建桶。
 
 volumes:
   postgres_data:

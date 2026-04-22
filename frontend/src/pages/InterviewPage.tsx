@@ -14,6 +14,19 @@ interface Message {
   content: string;
   category?: string;
   questionIndex?: number;
+  isFollowUp?: boolean;
+}
+
+const FLOW_STAGES = ['自我介绍', '技术问题', '项目深挖', '行为面试', '反问'] as const;
+
+function normalizeStage(category?: string): (typeof FLOW_STAGES)[number] {
+  const source = category ?? '';
+  if (source.includes('自我介绍') || source.toUpperCase().includes('INTRO')) return '自我介绍';
+  if (source.includes('技术') || source.toUpperCase().includes('TECH')) return '技术问题';
+  if (source.includes('项目') || source.toUpperCase().includes('PROJECT')) return '项目深挖';
+  if (source.includes('行为') || source.includes('HR') || source.toUpperCase().includes('BEHAVIOR')) return '行为面试';
+  if (source.includes('反问') || source.toUpperCase().includes('REVERSE') || source.toUpperCase().includes('QA')) return '反问';
+  return '技术问题';
 }
 
 interface InterviewProps {
@@ -25,6 +38,7 @@ interface InterviewProps {
     llmProvider?: string;
     skillId?: string;
     difficulty?: Difficulty;
+    personaType?: 'STRICT' | 'FRIENDLY';
     customCategories?: CategoryDTO[];
     jdText?: string;
   };
@@ -54,6 +68,7 @@ export default function Interview({
   const llmProvider = initialConfig?.llmProvider ?? 'dashscope';
   const skillId = initialConfig?.skillId ?? 'java-backend';
   const difficulty = initialConfig?.difficulty ?? 'mid';
+  const personaType = initialConfig?.personaType ?? 'STRICT';
   const customCategories = initialConfig?.customCategories;
   const jdText = initialConfig?.jdText;
 
@@ -83,6 +98,7 @@ export default function Interview({
         llmProvider,
         skillId,
         difficulty,
+        personaType,
         customCategories: skillId === CUSTOM_SKILL_ID ? customCategories : undefined,
         jdText: skillId === CUSTOM_SKILL_ID ? jdText : undefined,
       });
@@ -133,7 +149,8 @@ export default function Interview({
           type: 'interviewer',
           content: q.question,
           category: q.category,
-          questionIndex: i
+          questionIndex: i,
+          isFollowUp: Boolean(q.isFollowUp)
         });
         if (q.userAnswer) {
           restoredMessages.push({
@@ -166,13 +183,21 @@ export default function Interview({
 
       setAnswer('');
 
+      if (response.interviewerReply?.trim()) {
+        setMessages(prev => [...prev, {
+          type: 'interviewer',
+          content: response.interviewerReply!.trim()
+        }]);
+      }
+
       if (response.hasNextQuestion && response.nextQuestion) {
         setCurrentQuestion(response.nextQuestion);
         setMessages(prev => [...prev, {
           type: 'interviewer',
           content: response.nextQuestion!.question,
           category: response.nextQuestion!.category,
-          questionIndex: response.nextQuestion!.questionIndex
+          questionIndex: response.nextQuestion!.questionIndex,
+          isFollowUp: Boolean(response.nextQuestion!.isFollowUp)
         }]);
       } else {
         onInterviewComplete();
@@ -240,6 +265,10 @@ export default function Interview({
 
   if (!session || !currentQuestion) return null;
 
+  const currentStageLabel = normalizeStage(currentQuestion.category);
+  const stageIndex = FLOW_STAGES.indexOf(currentStageLabel);
+  const stageProgress = ((stageIndex + 1) / FLOW_STAGES.length) * 100;
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-10">
       <InterviewPageHeader
@@ -265,6 +294,8 @@ export default function Interview({
           currentQuestion={currentQuestion}
           messages={messages}
           answer={answer}
+          currentStageLabel={currentStageLabel}
+          stageProgress={stageProgress}
           onAnswerChange={setAnswer}
           onSubmit={handleSubmitAnswer}
           onCompleteEarly={handleCompleteEarly}

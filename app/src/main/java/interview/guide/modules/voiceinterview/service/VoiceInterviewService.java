@@ -4,6 +4,8 @@ import interview.guide.common.constant.CommonConstants.InterviewDefaults;
 import interview.guide.common.exception.BusinessException;
 import interview.guide.common.exception.ErrorCode;
 import interview.guide.common.model.AsyncTaskStatus;
+import interview.guide.modules.interview.service.InterviewFlowService;
+import interview.guide.modules.interview.service.InterviewerPersonaService;
 import interview.guide.modules.voiceinterview.config.VoiceInterviewProperties;
 import interview.guide.modules.voiceinterview.dto.CreateSessionRequest;
 import interview.guide.modules.voiceinterview.dto.VoiceInterviewMessageDTO;
@@ -48,6 +50,8 @@ public class VoiceInterviewService {
     private final RedissonClient redissonClient;
     private final VoiceInterviewProperties properties;
     private final VoiceEvaluateStreamProducer voiceEvaluateStreamProducer;
+    private final InterviewerPersonaService interviewerPersonaService;
+    private final InterviewFlowService interviewFlowService;
 
     private static final String SESSION_CACHE_KEY_PREFIX = "voice:interview:session:";
     private static final int CACHE_TTL_HOURS = 1;
@@ -66,12 +70,14 @@ public class VoiceInterviewService {
         String effectiveLlmProvider = (request.getLlmProvider() != null && !request.getLlmProvider().isBlank())
             ? request.getLlmProvider()
             : properties.getLlmProvider();
+        String effectivePersonaType = interviewerPersonaService.normalizePersonaType(request.getPersonaType());
 
         VoiceInterviewSessionEntity session = VoiceInterviewSessionEntity.builder()
                 .userId(DEFAULT_USER_ID)
                 .roleType(effectiveSkillId)
                 .skillId(effectiveSkillId)
                 .difficulty(request.getDifficulty() != null ? request.getDifficulty() : InterviewDefaults.DIFFICULTY)
+                .personaType(effectivePersonaType)
                 .customJdText(request.getCustomJdText())
                 .resumeId(request.getResumeId())
                 .introEnabled(request.getIntroEnabled())
@@ -80,14 +86,14 @@ public class VoiceInterviewService {
                 .hrEnabled(request.getHrEnabled())
                 .llmProvider(effectiveLlmProvider)
                 .plannedDuration(request.getPlannedDuration())
-                .currentPhase(determineFirstPhase(request))
+                .currentPhase(interviewFlowService.determineFirstPhase(request))
                 .build();
 
         VoiceInterviewSessionEntity saved = sessionRepository.save(session);
         cacheSession(saved);
 
-        log.info("Created voice interview session: {} with template: {}, phase: {}",
-                saved.getId(), effectiveSkillId, saved.getCurrentPhase());
+        log.info("Created voice interview session: {} with template: {}, personaType: {}, phase: {}",
+            saved.getId(), effectiveSkillId, effectivePersonaType, saved.getCurrentPhase());
 
         return buildSessionResponse(saved);
     }
@@ -393,38 +399,7 @@ public class VoiceInterviewService {
     public boolean shouldTransitionToNextPhase(VoiceInterviewSessionEntity session,
                                                 LocalDateTime phaseStartTime,
                                                 int questionCount) {
-        VoiceInterviewSessionEntity.InterviewPhase currentPhase = session.getCurrentPhase();
-        if (currentPhase == null || currentPhase == VoiceInterviewSessionEntity.InterviewPhase.COMPLETED) {
-            return false;
-        }
-
-        Duration phaseDuration = Duration.between(phaseStartTime, LocalDateTime.now());
-        VoiceInterviewProperties.DurationConfig config = getPhaseConfig(currentPhase);
-
-        // Rule 1: Max duration reached (forced transition)
-        if (phaseDuration.toMinutes() >= config.getMaxDuration()) {
-            log.info("Phase {} reached max duration {} minutes, forcing transition",
-                    currentPhase, config.getMaxDuration());
-            return true;
-        }
-
-        // Rule 2: Min questions reached and sufficient information gathered (AI judgment)
-        // For MVP, we use a simple heuristic based on question count
-        if (questionCount >= config.getMaxQuestions()) {
-            log.info("Phase {} reached max questions {}, suggesting transition",
-                    currentPhase, config.getMaxQuestions());
-            return true;
-        }
-
-        // Rule 3: Suggested duration reached with min questions
-        if (phaseDuration.toMinutes() >= config.getSuggestedDuration()
-                && questionCount >= config.getMinQuestions()) {
-            log.info("Phase {} reached suggested duration {} with {} questions, suggesting transition",
-                    currentPhase, config.getSuggestedDuration(), questionCount);
-            return true;
-        }
-
-        return false;
+        return interviewFlowService.shouldTransitionToNextPhase(session, phaseStartTime, questionCount, properties);
     }
 
     /**
@@ -435,49 +410,10 @@ public class VoiceInterviewService {
      * @return Next InterviewPhase or COMPLETED if no more phases
      */
     public VoiceInterviewSessionEntity.InterviewPhase getNextPhase(VoiceInterviewSessionEntity session) {
-        VoiceInterviewSessionEntity.InterviewPhase current = session.getCurrentPhase();
-        if (current == null) {
-            return getFirstEnabledPhase(session);
-        }
-
-        return switch (current) {
-            case INTRO -> session.getTechEnabled() ? VoiceInterviewSessionEntity.InterviewPhase.TECH :
-                    session.getProjectEnabled() ? VoiceInterviewSessionEntity.InterviewPhase.PROJECT :
-                            session.getHrEnabled() ? VoiceInterviewSessionEntity.InterviewPhase.HR :
-                                    VoiceInterviewSessionEntity.InterviewPhase.COMPLETED;
-            case TECH -> session.getProjectEnabled() ? VoiceInterviewSessionEntity.InterviewPhase.PROJECT :
-                    session.getHrEnabled() ? VoiceInterviewSessionEntity.InterviewPhase.HR :
-                            VoiceInterviewSessionEntity.InterviewPhase.COMPLETED;
-            case PROJECT -> session.getHrEnabled() ? VoiceInterviewSessionEntity.InterviewPhase.HR :
-                    VoiceInterviewSessionEntity.InterviewPhase.COMPLETED;
-            case HR, COMPLETED -> VoiceInterviewSessionEntity.InterviewPhase.COMPLETED;
-        };
+        return interviewFlowService.getNextPhase(session);
     }
 
     // ==================== Private Helper Methods ====================
-
-    /**
-     * Determine the first phase based on enabled phases
-     * 根据启用的阶段确定第一个阶段
-     */
-    private VoiceInterviewSessionEntity.InterviewPhase determineFirstPhase(CreateSessionRequest request) {
-        if (request.getIntroEnabled()) return VoiceInterviewSessionEntity.InterviewPhase.INTRO;
-        if (request.getTechEnabled()) return VoiceInterviewSessionEntity.InterviewPhase.TECH;
-        if (request.getProjectEnabled()) return VoiceInterviewSessionEntity.InterviewPhase.PROJECT;
-        if (request.getHrEnabled()) return VoiceInterviewSessionEntity.InterviewPhase.HR;
-        return VoiceInterviewSessionEntity.InterviewPhase.COMPLETED;
-    }
-
-    /**
-     * Get first enabled phase from session
-     */
-    private VoiceInterviewSessionEntity.InterviewPhase getFirstEnabledPhase(VoiceInterviewSessionEntity session) {
-        if (session.getIntroEnabled()) return VoiceInterviewSessionEntity.InterviewPhase.INTRO;
-        if (session.getTechEnabled()) return VoiceInterviewSessionEntity.InterviewPhase.TECH;
-        if (session.getProjectEnabled()) return VoiceInterviewSessionEntity.InterviewPhase.PROJECT;
-        if (session.getHrEnabled()) return VoiceInterviewSessionEntity.InterviewPhase.HR;
-        return VoiceInterviewSessionEntity.InterviewPhase.COMPLETED;
-    }
 
     private SessionResponseDTO buildSessionResponse(VoiceInterviewSessionEntity session) {
         return SessionResponseDTO.builder()
@@ -489,19 +425,6 @@ public class VoiceInterviewService {
                 .plannedDuration(session.getPlannedDuration())
                 .webSocketUrl(String.format("ws://localhost:8080/ws/voice-interview/%d", session.getId()))
                 .build();
-    }
-
-    /**
-     * Get phase configuration from properties
-     */
-    private VoiceInterviewProperties.DurationConfig getPhaseConfig(VoiceInterviewSessionEntity.InterviewPhase phase) {
-        return switch (phase) {
-            case INTRO -> properties.getPhase().getIntro();
-            case TECH -> properties.getPhase().getTech();
-            case PROJECT -> properties.getPhase().getProject();
-            case HR -> properties.getPhase().getHr();
-            default -> new VoiceInterviewProperties.DurationConfig(0, 0, 0, 0, 0);
-        };
     }
 
     /**

@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,7 +50,7 @@ class DashscopeLlmServiceTest {
       properties
     );
 
-    when(promptService.generateSystemPromptWithContext(anyString(), any())).thenReturn("system-prompt");
+    lenient().when(promptService.generateSystemPromptWithContext(anyString(), any(), anyString())).thenReturn("system-prompt");
   }
 
   @Test
@@ -62,7 +63,7 @@ class DashscopeLlmServiceTest {
     String result = dashscopeLlmService.chat("你好", session, Collections.emptyList());
 
     assertEquals("AI 服务认证失败，请检查 API Key 配置", result);
-    verify(promptService).generateSystemPromptWithContext(eq("java-backend"), eq(null));
+    verify(promptService).generateSystemPromptWithContext(eq("java-backend"), eq(null), eq("STRICT"));
   }
 
   @Test
@@ -131,7 +132,8 @@ class DashscopeLlmServiceTest {
     assertNotNull(result);
     verify(promptService).generateSystemPromptWithContext(
       eq("java-backend"),
-      eq("候选人具备三年后端开发经验")
+      eq("候选人具备三年后端开发经验"),
+      eq("STRICT")
     );
   }
 

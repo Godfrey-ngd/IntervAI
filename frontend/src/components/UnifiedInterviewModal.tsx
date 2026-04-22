@@ -16,6 +16,7 @@ export interface UnifiedInterviewConfig {
   skillId: string;
   skillName: string;
   difficulty: Difficulty;
+  personaType: 'STRICT' | 'FRIENDLY';
   resumeId?: number;
   resumeText?: string;
   llmProvider: string;
@@ -78,6 +79,7 @@ export default function UnifiedInterviewModal({
       skillId: config.skillId,
       skillName: selectedSkill?.name || '自定义',
       difficulty: config.difficulty,
+      personaType: config.personaType,
       resumeId: config.resumeId,
       llmProvider: config.llmProvider,
       questionCount: config.questionCount,
@@ -330,6 +332,36 @@ export default function UnifiedInterviewModal({
                         <button
                           key={opt.value}
                           onClick={() => config.setDifficulty(opt.value)}
+                          className={`py-2.5 px-3 rounded-xl border-2 transition-all duration-200 text-center
+                            ${selected
+                              ? 'border-primary-500 bg-primary-50/80 dark:bg-primary-900/20'
+                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                            }`}
+                        >
+                          <p className={`text-sm font-semibold ${selected ? 'text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-300'}`}>
+                            {opt.label}
+                          </p>
+                          <p className="text-[11px] text-slate-400">{opt.desc}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    面试官人格
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      { value: 'STRICT' as const, label: '严格', desc: '问题更直接，追问强度更高' },
+                      { value: 'FRIENDLY' as const, label: '友好', desc: '先引导再深挖，语气更缓和' },
+                    ]).map(opt => {
+                      const selected = config.personaType === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => config.setPersonaType(opt.value)}
                           className={`py-2.5 px-3 rounded-xl border-2 transition-all duration-200 text-center
                             ${selected
                               ? 'border-primary-500 bg-primary-50/80 dark:bg-primary-900/20'

@@ -161,9 +161,21 @@ public class DashscopeLlmService {
             }
         }
 
-        String systemPrompt = promptService.generateSystemPromptWithContext(session.getSkillId(), resumeText);
+        String systemPrompt = promptService.generateSystemPromptWithContext(
+            session.getSkillId(),
+            resumeText,
+            session.getPersonaType()
+        );
 
         StringBuilder promptBuilder = new StringBuilder();
+        promptBuilder.append("【当前面试阶段】")
+            .append(toPhaseDescription(session.getCurrentPhase()))
+            .append("\n");
+
+        if (session.getCurrentPhase() == VoiceInterviewSessionEntity.InterviewPhase.HR) {
+            promptBuilder.append("【阶段要求】本阶段先进行行为面试追问，阶段末尾需主动邀请候选人进行反问。\n");
+        }
+
         if (conversationHistory != null && !conversationHistory.isEmpty()) {
             promptBuilder.append("【之前的对话】\n");
             for (String message : conversationHistory) {
@@ -173,6 +185,19 @@ public class DashscopeLlmService {
         }
         promptBuilder.append("用户：").append(userInput);
         return new PromptContext(systemPrompt, promptBuilder.toString());
+    }
+
+    private String toPhaseDescription(VoiceInterviewSessionEntity.InterviewPhase phase) {
+        if (phase == null) {
+            return "技术问题";
+        }
+        return switch (phase) {
+            case INTRO -> "自我介绍";
+            case TECH -> "技术问题";
+            case PROJECT -> "项目深挖";
+            case HR -> "行为面试";
+            case COMPLETED -> "已完成";
+        };
     }
 
     private String mapLlmErrorToUserMessage(Exception e) {
