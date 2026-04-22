@@ -13,29 +13,43 @@ export default function VoiceInterviewEvaluationPage() {
   const [evaluateStatus, setEvaluateStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const triggerOnceRef = useRef(false);
+  const pollCountRef = useRef(0);
+
+  const sessionIdNumber = useMemo(() => {
+    if (!sessionId) return null;
+    const id = Number(sessionId);
+    return Number.isFinite(id) ? id : null;
+  }, [sessionId]);
 
   useEffect(() => {
+    triggerOnceRef.current = false;
+    pollCountRef.current = 0;
     loadEvaluation();
     return () => {
       if (pollingRef.current) {
         clearTimeout(pollingRef.current);
       }
     };
-  }, [sessionId]);
+  }, [sessionIdNumber]);
 
   const loadEvaluation = async () => {
-    if (!sessionId) return;
+    if (!sessionIdNumber) {
+      setError('无效的会话 ID');
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
-      const status = await voiceInterviewApi.getEvaluation(parseInt(sessionId));
-      handleStatusResponse(status);
+      const status = await voiceInterviewApi.getEvaluation(sessionIdNumber);
+      await handleStatusResponse(status);
     } catch {
       try {
-        const status = await voiceInterviewApi.generateEvaluation(parseInt(sessionId));
-        handleStatusResponse(status);
+        const status = await voiceInterviewApi.generateEvaluation(sessionIdNumber);
+        await handleStatusResponse(status);
       } catch (err) {
         console.error('Failed to trigger evaluation:', err);
         setError('触发评估失败，请重试');
@@ -44,7 +58,7 @@ export default function VoiceInterviewEvaluationPage() {
     }
   };
 
-  const handleStatusResponse = (response: EvaluationStatusResponse) => {
+  const handleStatusResponse = async (response: EvaluationStatusResponse) => {
     const status = response.evaluateStatus;
     setEvaluateStatus(status);
 
@@ -54,6 +68,26 @@ export default function VoiceInterviewEvaluationPage() {
     } else if (status === 'FAILED') {
       setError(response.evaluateError || '评估生成失败');
       setLoading(false);
+    } else if (!status) {
+      if (!sessionIdNumber) {
+        setError('无效的会话 ID');
+        setLoading(false);
+        return;
+      }
+      if (!triggerOnceRef.current) {
+        triggerOnceRef.current = true;
+        try {
+          const next = await voiceInterviewApi.generateEvaluation(sessionIdNumber);
+          setEvaluateStatus(next.evaluateStatus);
+          startPolling();
+        } catch (err) {
+          console.error('Failed to trigger evaluation:', err);
+          setError('该会话尚未生成评估，触发失败，请重试');
+          setLoading(false);
+        }
+      } else {
+        startPolling();
+      }
     } else {
       startPolling();
     }
@@ -65,10 +99,17 @@ export default function VoiceInterviewEvaluationPage() {
     }
 
     pollingRef.current = setTimeout(async () => {
-      if (!sessionId) return;
+      if (!sessionIdNumber) return;
+
+      pollCountRef.current += 1;
+      if (pollCountRef.current >= 60) {
+        setError('评估生成超时，请稍后重试');
+        setLoading(false);
+        return;
+      }
 
       try {
-        const response = await voiceInterviewApi.getEvaluation(parseInt(sessionId));
+        const response = await voiceInterviewApi.getEvaluation(sessionIdNumber);
         const status = response.evaluateStatus;
         setEvaluateStatus(status);
 
@@ -78,6 +119,14 @@ export default function VoiceInterviewEvaluationPage() {
         } else if (status === 'FAILED') {
           setError(response.evaluateError || '评估生成失败');
           setLoading(false);
+        } else if (!status && !triggerOnceRef.current) {
+          triggerOnceRef.current = true;
+          try {
+            await voiceInterviewApi.generateEvaluation(sessionIdNumber);
+          } catch (err) {
+            console.error('Failed to trigger evaluation:', err);
+          }
+          startPolling();
         } else {
           startPolling();
         }
@@ -86,17 +135,19 @@ export default function VoiceInterviewEvaluationPage() {
         setLoading(false);
       }
     }, 3000);
-  }, [sessionId]);
+  }, [sessionIdNumber]);
 
   const handleRetry = async () => {
-    if (!sessionId) return;
+    if (!sessionIdNumber) return;
     setLoading(true);
     setError(null);
     setEvaluateStatus(null);
+    triggerOnceRef.current = false;
+    pollCountRef.current = 0;
 
     try {
-      const status = await voiceInterviewApi.generateEvaluation(parseInt(sessionId));
-      handleStatusResponse(status);
+      const status = await voiceInterviewApi.generateEvaluation(sessionIdNumber);
+      await handleStatusResponse(status);
     } catch (err) {
       console.error('Failed to retry evaluation:', err);
       setError('重试失败，请稍后再试');
@@ -108,7 +159,7 @@ export default function VoiceInterviewEvaluationPage() {
     if (!evaluation) return null;
     return {
       id: 0,
-      sessionId: sessionId!,
+      sessionId: String(sessionIdNumber ?? ''),
       totalQuestions: evaluation.totalQuestions,
       status: 'COMPLETED',
       overallScore: evaluation.overallScore,
