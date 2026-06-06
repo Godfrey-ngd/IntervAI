@@ -11,7 +11,6 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 s
-
   <artifactId>app</artifactId>
   <name>ai-interview-platform-app</name>
   <description>AI Interview Platform Backend Application</description>
