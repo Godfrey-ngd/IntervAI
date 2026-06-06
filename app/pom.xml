@@ -10,7 +10,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-1
+
   <artifactId>app</artifactId>
   <name>ai-interview-platform-app</name>
   <description>AI Interview Platform Backend Application</description>
